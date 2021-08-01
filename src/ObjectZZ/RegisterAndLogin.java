@@ -12,6 +12,7 @@ public class RegisterAndLogin {
     String passwordAgain;
     String typeOfUser;
     DBConnect zz;
+    int checkInTheTwoField;
     public RegisterAndLogin(String userName, String password, String passwordAgain, String typeOfUser) {
         this.userName = userName;
         this.password = password;
@@ -25,6 +26,21 @@ public class RegisterAndLogin {
         this.password = password;
     }
 
+    public String getUserName() {
+        return userName;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    private void setCheckInTheTwoField(int checkInTheTwoField) {
+        this.checkInTheTwoField = checkInTheTwoField;
+    }
+
+    public int getCheckInTheTwoField() {
+        return this.checkInTheTwoField;
+    }
     //Method validate each field is empty or not
     private boolean checkUserName() {
         return userName.isEmpty();
@@ -68,15 +84,35 @@ public class RegisterAndLogin {
         return checkUser;
     }
 
+    private void executeInsert(int ID){
+        this.zz.setQuery("INSERT INTO User(Name, Password) VALUES ('" + this.userName + "','" + this.password +"');");
+        this.zz.threeCommand();
+        int usrId = 0;
+        try {
+            ResultSet gg = this.zz.getStmt().getGeneratedKeys();
+            if (gg.next()) {
+                usrId = gg.getInt(1);
+            }
+        }catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        this.zz.setQuery("INSERT INTO Permissions(IDUser, RoleID) VALUES ("+ usrId + "," + ID + ");");
+        this.zz.threeCommand();
+    }
 
     private void insertIfTheUserNotInTheSystem() {
         if(this.typeOfUser.equals("user")) {
-            this.zz.setQuery("INSERT INTO User(Name, Password) VALUES ('" + this.userName + "', '" + this.password + "')");
-            this.zz.anotherCommand();
-            this.zz.setQuery("INSERT INTO Permissions(IDUser, RoleID) VALUES (LAST_INSERT_ID(), 2)");
-            this.zz.anotherCommand();
+            executeInsert(2);
         } else if(this.typeOfUser.equals("manager")) {
+            executeInsert(3);
+        }
+    }
 
+    private void insertToTheDBAfterSetUserType() {
+        if(getCheckInTheTwoField() == 2) {
+            executeInsert(getCheckInTheTwoField());
+        } else if(getCheckInTheTwoField() == 3) {
+            executeInsert(getCheckInTheTwoField());
         }
     }
     //Public register method call
@@ -89,9 +125,17 @@ public class RegisterAndLogin {
                             if(!isTheUserInSystem()) {
                                 displayWarningPassword("Choose another username.", "fail");
                             } else {
-                                insertIfTheUserNotInTheSystem();
-                                displayWarningPassword("Register success", "success");
+                                if(this.typeOfUser.equals("user")) {
+                                    displayWarningPassword("Register success", "success");
+                                    setCheckInTheTwoField(2);
+                                    insertToTheDBAfterSetUserType();
+                                } else {
+                                    displayWarningPassword("Please wait for the admin to accept your request", "success");
+                                    setCheckInTheTwoField(3);
+                                    insertToTheDBAfterSetUserType();
+                                }
                             }
+
                         } else {
                             displayWarningPassword("Two password not match.", "fail");
                         }

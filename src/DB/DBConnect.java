@@ -27,6 +27,10 @@ public class DBConnect {
         }
     }
 
+    public Statement getStmt() {
+        return stmt;
+    }
+
     //Select from db
     public void setQuery(String sqlQuery) {
         this.query = sqlQuery;
@@ -55,11 +59,13 @@ public class DBConnect {
         return this.rs;
     }
 
-    //UPDATE, INSERT, DELETE
-    private int initializeForThreeCommand() throws Exception {
+    //UPDATE, DELETE, INSERT
+    private int initializeForTwoCommand() throws Exception {
         if(this.query != null) {
             if(checkQuery() == 1) {
                 return this.stmt.executeUpdate(this.query);
+            } else if(checkQuery() == 2) {
+                return this.stmt.executeUpdate(this.query, Statement.RETURN_GENERATED_KEYS);
             } else {
                 return -1;
             }
@@ -71,13 +77,15 @@ public class DBConnect {
     private int checkQuery() {
         String[] split = this.query.split("\\s+");
         return switch (split[0].toUpperCase()) {
-            case "UPDATE", "DELETE", "INSERT" -> 1;
+            case "UPDATE", "DELETE" -> 1;
+            case "INSERT" -> 2;
             default -> -1;
         };
     }
-    public void anotherCommand(){
+
+    public void threeCommand(){
         try {
-            int numberInform = initializeForThreeCommand();
+            int numberInform = initializeForTwoCommand();
             if(numberInform == -1) {
                 throw new NotFoundCommandException("Command not found, use Update, Insert, Delete");
             } else {

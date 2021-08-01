@@ -35,6 +35,8 @@ public class UIMain extends JFrame {
             JTextField tfUserNameReg;
         //JPasswordField
             JPasswordField tfPasswordReg, tfPasswordAgain;
+        //JRadio button
+            JRadioButton radioBtn1, radioBtn2;
         //Button group
             ButtonGroup buttonGroupReg;
         //JButton
@@ -222,9 +224,9 @@ public class UIMain extends JFrame {
                             JPanel topDefaul4 = new JPanel();
                             containRadioButtonField.add(topDefaul4);
                             JPanel centerCustom4 = new JPanel();
-                            JRadioButton radioBtn1 = new JRadioButton("User", true);
+                            radioBtn1 = new JRadioButton("User", true);
                             radioBtn1.setActionCommand("user");
-                            JRadioButton radioBtn2 = new JRadioButton("Manager");
+                            radioBtn2 = new JRadioButton("Manager");
                             radioBtn2.setActionCommand("manager");
                             buttonGroupReg = new ButtonGroup();
                             buttonGroupReg.add(radioBtn1);
@@ -237,21 +239,6 @@ public class UIMain extends JFrame {
                             containRadioButton.add(containRadioButtonField, BorderLayout.CENTER);
                             col2.add(containRadioButton);
 
-                            /*
-                            //Row 5 contain button register to handle the database and field input
-                            JPanel containButtonRegister = new JPanel();
-                            containButtonRegister.setLayout(new GridLayout(0,3));
-                            JPanel leftDefault5 = new JPanel();
-                            containButtonRegister.add(leftDefault5);
-                            JPanel centerCustom5 = new JPanel();
-                            JButton btnRegisterAction = new JButton("Register");
-                            btnRegisterAction.setActionCommand("Handle register");
-                            centerCustom5.add(btnRegisterAction);
-                            containButtonRegister.add(centerCustom5);
-                            JPanel rightDefault5 = new JPanel();
-                            containButtonRegister.add(rightDefault5);
-                            col2.add(containButtonRegister);
-                             */
                         row1.add(col2);
                         //col 3 is default
                         JPanel col3 = new JPanel();
@@ -312,14 +299,29 @@ public class UIMain extends JFrame {
                 case "register switch":
                     System.out.println("Click on register");
                     card.show(cardLayout, "Register panel");
+                    tfUserNameReg.setText("");
+                    tfPasswordReg.setText("");
+                    tfPasswordAgain.setText("");
+                    radioBtn1.setSelected(true);
                     break;
                 case "login switch":
                     System.out.println("Click on back to login");
                     card.show(cardLayout,"Login panel");
+                    userNameTf.setText("");
+                    passwordTf.setText("");
                     break;
                 case "handle register":
                     validateCheck = new RegisterAndLogin(tfUserNameReg.getText(),tfPasswordReg.getText(),tfPasswordAgain.getText(),buttonGroupReg.getSelection().getActionCommand());
                     validateCheck.checkInRegisterTwoFieldMatch();
+                    if(validateCheck.getCheckInTheTwoField() == 2) {
+                        userNameTf.setText(validateCheck.getUserName());
+                        passwordTf.setText(validateCheck.getPassword());
+                        radioBtn1.setSelected(true);
+                        card.show(cardLayout,"Login panel");
+                    } else {
+                        radioBtn1.setSelected(true);
+                        card.show(cardLayout,"Login panel");
+                    }
                     break;
                 case "handle login":
                     validateCheck = new RegisterAndLogin(userNameTf.getText(), passwordTf.getText());
