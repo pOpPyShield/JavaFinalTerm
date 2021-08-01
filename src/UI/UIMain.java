@@ -1,10 +1,14 @@
 package UI;
 
+import ObjectZZ.RegisterAndLogin;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.image.BufferedImage;
@@ -14,8 +18,29 @@ import java.io.IOException;
 import java.net.URL;
 
 public class UIMain extends JFrame {
+    //Card layout
+    JPanel cardLayout;
+
+    //JLabel of card register
+    JLabel labelCenter;
+    //Login panel
+        //JTextField
+        JTextField userNameTf;
+        //JPasswordField
+        JPasswordField passwordTf;
+        //JButton
+        JButton btnLogin;
+    //Register panel
+        //JTextField
+            JTextField tfUserNameReg;
+        //JPasswordField
+            JPasswordField tfPasswordReg, tfPasswordAgain;
+        //Button group
+            ButtonGroup buttonGroupReg;
+        //JButton
+            JButton btnReg;
     public UIMain() throws IOException {
-        setLayout(new GridLayout(0,2));
+        //setLayout(new GridLayout(0,2));
         setSize(1100, 800);
         setLocationRelativeTo(null);
         setResizable(false);
@@ -24,11 +49,15 @@ public class UIMain extends JFrame {
         setIconImage(icon.getImage());
         setTitle("Library Management");
 
+        cardLayout = new JPanel();
+        cardLayout.setLayout(new CardLayout());
 
+        JPanel card1 = new JPanel();
+        card1.setLayout(new GridLayout(0, 2));
         BackgroundPane leftPanel = new BackgroundPane();
         leftPanel.setBackground(ImageIO.read(new File("/home/huygrogbro/IdeaProjects/FinalTerm/src/Pictures/leftPanelBg.jpeg")));
         leftPanel.setBorder(BorderFactory.createRaisedBevelBorder());
-        add(leftPanel);
+        card1.add(leftPanel);
 
         JPanel rightPanel = new JPanel();
         rightPanel.setLayout(new GridLayout(3, 1));
@@ -57,14 +86,14 @@ public class UIMain extends JFrame {
                     JPanel box1 = new JPanel();
                     box1.setLayout(new GridLayout(2,2));
                         JPanel containComponentInFirstRow = new JPanel();
-                        Label userNameDisplay = new Label("Enter your username: ");
+                        JLabel userNameDisplay = new JLabel("Enter your username: ", SwingConstants.RIGHT);
                         Font fontUserNameDisplay = new Font("Helvetica", Font.BOLD, 10);
                         userNameDisplay.setFont(fontUserNameDisplay);
                         containComponentInFirstRow.add(userNameDisplay);
                         box1.add(containComponentInFirstRow);
 
                         JPanel containComponentInSecondRow = new JPanel();
-                        JTextField userNameTf = new JTextField(20);
+                        userNameTf = new JTextField(20);
                         userNameTf.setPreferredSize(new Dimension(20,20));
                         Font fontUserNameTf = new Font("SansSerif", Font.BOLD,10);
                         userNameTf.setFont(fontUserNameTf);
@@ -72,39 +101,199 @@ public class UIMain extends JFrame {
                         box1.add(containComponentInSecondRow);
 
                         JPanel containComponentInThird = new JPanel();
-                        Label passwordDisplay = new Label("Enter your password: ");
+                        JLabel passwordDisplay = new JLabel("Enter your password: ",SwingConstants.RIGHT);
                         passwordDisplay.setFont(fontUserNameDisplay);
                         containComponentInThird.add(passwordDisplay);
                         box1.add(containComponentInThird);
 
                         JPanel containComponentInFourth = new JPanel();
-                        JPasswordField passwordTf = new JPasswordField(20);
+                        passwordTf = new JPasswordField(20);
                         passwordTf.setPreferredSize(new Dimension(20,20));
                         containComponentInFourth.add(passwordTf);
                         box1.add(containComponentInFourth);
                     JPanel box2 = new JPanel();
                             JPanel handleButton1 = new JPanel();
-                            JButton button1 = new JButton("Login");
-                            button1.setPreferredSize(new Dimension(150, 60));
-                            handleButton1.add(button1);
+                            btnLogin = new JButton("Login");
+                            btnLogin.setActionCommand("handle login");
+                            btnLogin.addActionListener(new ButtonActionListener());
+                            btnLogin.setPreferredSize(new Dimension(150, 60));
+                            handleButton1.add(btnLogin);
                             box2.add(handleButton1);
 
                             JPanel handleButton2 = new JPanel();
                             JButton button2 = new JButton("Register");
+                            button2.setActionCommand("register switch");
+                            button2.addActionListener(new ButtonActionListener());
                             button2.setPreferredSize(new Dimension(150, 60));
                             handleButton2.add(button2);
                             box2.add(handleButton2);
                 secondRowFirst.add(box1);
                 secondRowFirst.add(box2);
                 JPanel secondRowSecond = new JPanel();
-
-
                 insideRightPanelSecondRow.add(secondRowFirst);
                 insideRightPanelSecondRow.add(secondRowSecond);
 
         rightPanel.add(insideRightPanelFirstRow);
         rightPanel.add(insideRightPanelSecondRow);
-        add(rightPanel);
+        card1.add(rightPanel);
+        cardLayout.add(card1, "Login panel");
+
+        //Card2
+        JPanel card2 = new JPanel();
+        card2.setLayout(new BorderLayout());
+            //Jpanel at north of card2
+            JPanel panelContaiButton = new JPanel();
+            panelContaiButton.setLayout(new BorderLayout());
+            panelContaiButton.setBorder(BorderFactory.createEmptyBorder(30,40,20,0));
+                JButton buttonBackToLogin = new JButton("Back");
+                buttonBackToLogin.setPreferredSize(new Dimension(100,50));
+                buttonBackToLogin.setActionCommand("login switch");
+                buttonBackToLogin.addActionListener(new ButtonActionListener());
+            //Button at left
+            panelContaiButton.add(buttonBackToLogin, BorderLayout.LINE_START);
+
+            //Jpanel at center of card2
+            JPanel panelCenter = new JPanel();
+            panelCenter.setLayout(new BorderLayout());
+            labelCenter = new JLabel("Register user", SwingConstants.CENTER);
+            labelCenter.setFont(new Font("SansSerif", Font.ITALIC,40));
+            labelCenter.setForeground(Color.RED);
+            panelCenter.add(labelCenter, BorderLayout.NORTH);
+                JPanel panelBelowLabel = new JPanel();
+                panelBelowLabel.setLayout(new GridLayout(2,0));
+                    //Row 1 is grid with 3 column
+                    JPanel row1 = new JPanel();
+                    row1.setLayout(new GridLayout(0,3));
+                        //col 1 is default
+                        JPanel col1 = new JPanel();
+                        row1.add(col1);
+                        //col 2 is contain input and label
+                        JPanel col2 = new JPanel();
+                        col2.setLayout(new GridLayout(4,0));
+
+                            //Row 1 contain username section
+                            JPanel containUserNameRow1 = new JPanel();
+                            containUserNameRow1.setLayout(new BorderLayout());
+                            containUserNameRow1.add(new JLabel("UserName: ", SwingConstants.CENTER), BorderLayout.LINE_START);
+                            JPanel containUserNameField = new JPanel();
+                            containUserNameField.setLayout(new GridLayout(3,0));
+                            JPanel topDefault = new JPanel();
+                            containUserNameField.add(topDefault);
+                            containUserNameField.add(tfUserNameReg = new JTextField(20));
+                            JPanel bottomDefault = new JPanel();
+                            containUserNameField.add(bottomDefault);
+                            containUserNameRow1.add(containUserNameField, BorderLayout.CENTER);
+                            col2.add(containUserNameRow1);
+
+                            //Row 2 contain password section
+                            JPanel containPasswordRow2 = new JPanel();
+                            containPasswordRow2.setLayout(new BorderLayout());
+                            containPasswordRow2.add(new JLabel("Password: ", SwingConstants.CENTER), BorderLayout.LINE_START);
+                            JPanel containPasswordField = new JPanel();
+                            containPasswordField.setLayout(new GridLayout(3,0));
+                            JPanel topDefault2 = new JPanel();
+                            containPasswordField.add(topDefault2);
+                            containPasswordField.add(tfPasswordReg = new JPasswordField(20));
+                            JPanel bottomDefault2 = new JPanel();
+                            containPasswordField.add(bottomDefault2);
+                            containPasswordRow2.add(containPasswordField, BorderLayout.CENTER);
+                            col2.add(containPasswordRow2);
+
+                            //Row 3 contain password again section
+                            JPanel containPasswordAgainRow3 = new JPanel();
+                            containPasswordAgainRow3.setLayout(new BorderLayout());
+                            containPasswordAgainRow3.add(new JLabel("Enter again: ", SwingConstants.CENTER), BorderLayout.LINE_START);
+                            JPanel containPasswordAgainField = new JPanel();
+                            containPasswordAgainField.setLayout(new GridLayout(3,0));
+                            JPanel topDefault3 = new JPanel();
+                            containPasswordAgainField.add(topDefault3);
+                            containPasswordAgainField.add(tfPasswordAgain = new JPasswordField(20));
+                            JPanel bottomDefault3 = new JPanel();
+                            containPasswordAgainField.add(bottomDefault3);
+                            containPasswordAgainRow3.add(containPasswordAgainField, BorderLayout.CENTER);
+                            col2.add(containPasswordAgainRow3);
+
+                            //Row 4 contain radio button section
+                            JPanel containRadioButton = new JPanel();
+                            containRadioButton.setLayout(new BorderLayout());
+                            containRadioButton.add(new JLabel("Type of user: ",SwingConstants.CENTER), BorderLayout.LINE_START);
+                            JPanel containRadioButtonField = new JPanel();
+                            containRadioButtonField.setLayout(new GridLayout(3,0));
+                            JPanel topDefaul4 = new JPanel();
+                            containRadioButtonField.add(topDefaul4);
+                            JPanel centerCustom4 = new JPanel();
+                            JRadioButton radioBtn1 = new JRadioButton("User", true);
+                            radioBtn1.setActionCommand("user");
+                            JRadioButton radioBtn2 = new JRadioButton("Manager");
+                            radioBtn2.setActionCommand("manager");
+                            buttonGroupReg = new ButtonGroup();
+                            buttonGroupReg.add(radioBtn1);
+                            buttonGroupReg.add(radioBtn2);
+                            centerCustom4.add(radioBtn1);
+                            centerCustom4.add(radioBtn2);
+                            containRadioButtonField.add(centerCustom4);
+                            JPanel bottomDefault4 = new JPanel();
+                            containRadioButtonField.add(bottomDefault4);
+                            containRadioButton.add(containRadioButtonField, BorderLayout.CENTER);
+                            col2.add(containRadioButton);
+
+                            /*
+                            //Row 5 contain button register to handle the database and field input
+                            JPanel containButtonRegister = new JPanel();
+                            containButtonRegister.setLayout(new GridLayout(0,3));
+                            JPanel leftDefault5 = new JPanel();
+                            containButtonRegister.add(leftDefault5);
+                            JPanel centerCustom5 = new JPanel();
+                            JButton btnRegisterAction = new JButton("Register");
+                            btnRegisterAction.setActionCommand("Handle register");
+                            centerCustom5.add(btnRegisterAction);
+                            containButtonRegister.add(centerCustom5);
+                            JPanel rightDefault5 = new JPanel();
+                            containButtonRegister.add(rightDefault5);
+                            col2.add(containButtonRegister);
+                             */
+                        row1.add(col2);
+                        //col 3 is default
+                        JPanel col3 = new JPanel();
+                        row1.add(col3);
+                    //Row2
+                    JPanel row2 = new JPanel();
+                    row2.setLayout(new BorderLayout());
+                        JPanel northOfRow2 = new JPanel();
+                        northOfRow2.setLayout(new GridLayout(0,3));
+
+                            //Col 1
+                            JPanel leftDefaultNorthOfRow2 = new JPanel();
+                            northOfRow2.add(leftDefaultNorthOfRow2);
+
+                            //Col 2
+                            JPanel centerCustomNorthOfRow2 = new JPanel();
+                            centerCustomNorthOfRow2.setLayout(new GridLayout(0,3));
+
+                                //Col 1
+                                JPanel leftOfCenterCol = new JPanel();
+                                centerCustomNorthOfRow2.add(leftOfCenterCol);
+
+                                //Col 2
+                                centerCustomNorthOfRow2.add(btnReg = new JButton("Register"));
+                                btnReg.setActionCommand("handle register");
+                                btnReg.addActionListener(new ButtonActionListener());
+                                btnReg.setPreferredSize(new Dimension(100,40));
+                                //Col 3
+                                JPanel rightOfCenterCol = new JPanel();
+                                centerCustomNorthOfRow2.add(rightOfCenterCol);
+                                northOfRow2.add(centerCustomNorthOfRow2);
+                            //Col 3
+                            JPanel rightDefaultNorthOfRow2 = new JPanel();
+                            northOfRow2.add(rightDefaultNorthOfRow2);
+                        row2.add(northOfRow2, BorderLayout.NORTH);
+                    panelBelowLabel.add(row1);
+                    panelBelowLabel.add(row2);
+                panelCenter.add(panelBelowLabel, BorderLayout.CENTER);
+        card2.add(panelCenter, BorderLayout.CENTER);
+        card2.add(panelContaiButton, BorderLayout.NORTH);
+        cardLayout.add(card2, "Register panel");
+        add(cardLayout);
 
         //Debug
         setDefaultLookAndFeelDecorated(true);
@@ -112,7 +301,33 @@ public class UIMain extends JFrame {
         setVisible(true);
     }
 
-
+    private class ButtonActionListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent actionEvent) {
+            JButton button = (JButton) actionEvent.getSource();
+            CardLayout card = (CardLayout) (cardLayout.getLayout());
+            RegisterAndLogin validateCheck;
+            switch (button.getActionCommand()) {
+                //First frame of application
+                case "register switch":
+                    System.out.println("Click on register");
+                    card.show(cardLayout, "Register panel");
+                    break;
+                case "login switch":
+                    System.out.println("Click on back to login");
+                    card.show(cardLayout,"Login panel");
+                    break;
+                case "handle register":
+                    validateCheck = new RegisterAndLogin(tfUserNameReg.getText(),tfPasswordReg.getText(),tfPasswordAgain.getText(),buttonGroupReg.getSelection().getActionCommand());
+                    validateCheck.checkInRegisterTwoFieldMatch();
+                    break;
+                case "handle login":
+                    validateCheck = new RegisterAndLogin(userNameTf.getText(), passwordTf.getText());
+                    validateCheck.checkInLogin();
+                    break;
+            }
+        }
+    }
     //https://stackoverflow.com/questions/22162398/how-to-set-a-background-picture-in-jpanel
     public class BackgroundPane extends JPanel {
 
