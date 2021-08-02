@@ -26,6 +26,11 @@ public class HomeUserPanel extends JPanel {
     private JTextField tfFinding;
     private JButton findButton;
 
+    //JTextField
+    JTextField idBook, nameBook, priceBook, nameAuthor, typeBook;
+
+    //JLabel display image
+    JLabel placeDisplayImage;
     //Table in Book
     JTable jt;
     String[] column = {"IDBook","Name of book","Price","Name author","Type"};
@@ -37,6 +42,9 @@ public class HomeUserPanel extends JPanel {
     //JPanel cardLayout
     JPanel cardPanel;
     CardLayout cardLayout;
+
+    //Borrow panel depend on Jpanel card layout
+    BorrowPanel componentBorrowBookPanel;
     public HomeUserPanel(UIMain main, CardPanel card) {
         this.card = card;
         this.main = main;
@@ -189,7 +197,9 @@ public class HomeUserPanel extends JPanel {
                             containJTextIDBook.setLayout(new GridLayout(3,0));
                             JPanel boxId1 = new JPanel();
                             containJTextIDBook.add(boxId1);
-                            containJTextIDBook.add(new JTextField(20));
+                            idBook = new JTextField(20);
+                            idBook.setEditable(false);
+                            containJTextIDBook.add(idBook);
                             JPanel boxId2 = new JPanel();
                             containJTextIDBook.add(boxId2);
                             containIdBook.add(containJTextIDBook);
@@ -202,7 +212,9 @@ public class HomeUserPanel extends JPanel {
                             containJTextNameBook.setLayout(new GridLayout(3,0));
                             JPanel boxName1 = new JPanel();
                             containJTextNameBook.add(boxName1);
-                            containJTextNameBook.add(new JTextField(20));
+                            nameBook = new JTextField(20);
+                            nameBook.setEditable(false);
+                            containJTextNameBook.add(nameBook);
                             JPanel boxName2 = new JPanel();
                             containJTextNameBook.add(boxName2);
                             containNameBook.add(containJTextNameBook);
@@ -215,7 +227,9 @@ public class HomeUserPanel extends JPanel {
                             containJTextPriceBook.setLayout(new GridLayout(3,0));
                             JPanel boxPrice1 = new JPanel();
                             containJTextPriceBook.add(boxPrice1);
-                            containJTextPriceBook.add(new JTextField(20));
+                            priceBook = new JTextField(20);
+                            priceBook.setEditable(false);
+                            containJTextPriceBook.add(priceBook);
                             JPanel boxPrice2 = new JPanel();
                             containJTextPriceBook.add(boxPrice2);
                             containPriceBook.add(containJTextPriceBook);
@@ -228,7 +242,9 @@ public class HomeUserPanel extends JPanel {
                             containJTextAuthorName.setLayout(new GridLayout(3,0));
                             JPanel boxAuthorName1 = new JPanel();
                             containJTextAuthorName.add(boxAuthorName1);
-                            containJTextAuthorName.add(new JTextField(20));
+                            nameAuthor = new JTextField(20);
+                            nameAuthor.setEditable(false);
+                            containJTextAuthorName.add(nameAuthor);
                             JPanel boxAuthorName2 = new JPanel();
                             containJTextAuthorName.add(boxAuthorName2);
                             containAuthorNameBook.add(containJTextAuthorName);
@@ -241,7 +257,9 @@ public class HomeUserPanel extends JPanel {
                             containJTextTypeBook.setLayout(new GridLayout(3,0));
                             JPanel boxType1 = new JPanel();
                             containJTextTypeBook.add(boxType1);
-                            containJTextTypeBook.add(new JTextField(20));
+                            typeBook = new JTextField(20);
+                            typeBook.setEditable(false);
+                            containJTextTypeBook.add(typeBook);
                             JPanel boxType2 = new JPanel();
                             containJTextTypeBook.add(boxType2);
                             containTypeOfBook.add(containJTextTypeBook);
@@ -254,7 +272,7 @@ public class HomeUserPanel extends JPanel {
                             JPanel containImage = new JPanel();
                             containImage.setBorder(new EmptyBorder(10,100,10,100));
                             containImage.setLayout(new BorderLayout());
-                            JLabel placeDisplayImage = new JLabel("Not has image here :(", SwingConstants.CENTER);
+                            placeDisplayImage = new JLabel("Not has image here :(", SwingConstants.CENTER);
                             placeDisplayImage.setBorder(BorderFactory.createLineBorder(Color.blue));
                             containImage.add(placeDisplayImage, BorderLayout.CENTER);
                             colDisplayImageAndBtnBorrow.add(containImage, BorderLayout.CENTER);
@@ -282,6 +300,7 @@ public class HomeUserPanel extends JPanel {
                             comboBox1.setLayout(new BorderLayout());
                             comboBox1.add(new JLabel("Filter: ", SwingConstants.CENTER), BorderLayout.LINE_START);
                             cb = new JComboBox(filterString);
+                            cb.setSelectedIndex(-1);
                             comboBox1.add(cb,BorderLayout.CENTER);
                             comboboxContain.add(comboBox1);
 
@@ -310,11 +329,19 @@ public class HomeUserPanel extends JPanel {
 
             bookPanel.add(belowLabel, BorderLayout.CENTER);
             cardPanel.add(bookPanel, NAMEBOOKCARD);
+            componentBorrowBookPanel = new BorrowPanel(this);
+
         add(cardPanel, BorderLayout.CENTER);
 
         card.addCard(this, NAME);
     }
+    public JPanel getCardPanel() {
+        return this.cardPanel;
+    }
 
+    public CardLayout getCardLayout() {
+        return this.cardLayout;
+    }
     private class ButtonActionListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
@@ -332,7 +359,8 @@ public class HomeUserPanel extends JPanel {
                     cardLayout.show(cardPanel, NAMEBOOKCARD);
                     break;
                 case BORROWBOOKCARD:
-                    System.out.println(BORROWBOOKCARD);
+                    componentBorrowBookPanel.showBorrowPanel();
+                    cb.setSelectedIndex(-1);
                     break;
                 case INFORMATIONCARD:
                     System.out.println(INFORMATIONCARD);
