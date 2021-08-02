@@ -5,17 +5,38 @@ import UI.UIMain;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.EventObject;
 
 public class HomeUserPanel extends JPanel {
     public static final String NAME = "HomeUserPanel";
     public static final String TITLE = "Student place";
+    public static final String NAMEBOOKCARD = "Book panel";
+    public static final String BORROWBOOKCARD = "Borrow panel";
+    public static final String INFORMATIONCARD = "Information panel";
     private CardPanel card;
     private JFrame main;
     //Left panel
     private JButton exitToLoginPanel, bookBtn, borrowBtn, informationBtn;
+
+    //Finding Book
+    private JTextField tfFinding;
+    private JButton findButton;
+
+    //Table in Book
+    JTable jt;
+    String[] column = {"IDBook","Name of book","Price","Name author","Type"};
+
+    //JComboBox
+    String[] filterString = {"Name", "Author", "Price", "Type"};
+    JComboBox cb;
+
+    //JPanel cardLayout
+    JPanel cardPanel;
+    CardLayout cardLayout;
     public HomeUserPanel(UIMain main, CardPanel card) {
         this.card = card;
         this.main = main;
@@ -56,6 +77,8 @@ public class HomeUserPanel extends JPanel {
                 JPanel containBookBtn = new JPanel();
                 containBookBtn.setBackground(colorForAllLeftJPanel);
                 bookBtn = new JButton("BOOK");
+                bookBtn.setActionCommand(NAMEBOOKCARD);
+                bookBtn.addActionListener(new ButtonActionListener());
                 bookBtn.setPreferredSize(dimensionForButton);
                 ImageIcon iconOfBookBtn = new ImageIcon("/home/huygrogbro/IdeaProjects/FinalTerm/src/Pictures/Book.png");
                 bookBtn.setIcon(iconOfBookBtn);
@@ -66,6 +89,8 @@ public class HomeUserPanel extends JPanel {
                 JPanel containBorrowBookBtn = new JPanel();
                 containBorrowBookBtn.setBackground(colorForAllLeftJPanel);
                 borrowBtn = new JButton("BORROW BOOK");
+                borrowBtn.setActionCommand(BORROWBOOKCARD);
+                borrowBtn.addActionListener(new ButtonActionListener());
                 borrowBtn.setPreferredSize(dimensionForButton);
                 ImageIcon iconOfBorrowBookBtn = new ImageIcon("/home/huygrogbro/IdeaProjects/FinalTerm/src/Pictures/BorrowBook.png");
                 borrowBtn.setIcon(iconOfBorrowBookBtn);
@@ -76,6 +101,8 @@ public class HomeUserPanel extends JPanel {
                 JPanel containInformation = new JPanel();
                 containInformation.setBackground(colorForAllLeftJPanel);
                 informationBtn = new JButton("INFORMATION");
+                informationBtn.setActionCommand(INFORMATIONCARD);
+                informationBtn.addActionListener(new ButtonActionListener());
                 informationBtn.setPreferredSize(dimensionForButton);
                 ImageIcon iconOfInfomationBTN = new ImageIcon("/home/huygrogbro/IdeaProjects/FinalTerm/src/Pictures/InformationStudent.png");
                 informationBtn.setIcon(iconOfInfomationBTN);
@@ -109,8 +136,181 @@ public class HomeUserPanel extends JPanel {
             leftPanel.add(thirdRowOfLeftPanel);
         add(leftPanel, BorderLayout.LINE_START);
 
-        JPanel centerPanel = new JPanel();
-        add(centerPanel, BorderLayout.CENTER);
+        cardPanel = new JPanel();
+        cardLayout = new CardLayout();
+        cardPanel.setLayout(cardLayout);
+        JPanel bookPanel = new JPanel();
+        bookPanel.setLayout(new BorderLayout());
+            JLabel titleOFBook = new JLabel("Book information", SwingConstants.CENTER);
+            titleOFBook.setFont(new Font("SansSerif", Font.ITALIC,40));
+            titleOFBook.setBorder(new EmptyBorder(10,0,10,0));
+            titleOFBook.setForeground(Color.BLACK);
+            bookPanel.add(titleOFBook, BorderLayout.NORTH);
+
+            JPanel belowLabel = new JPanel();
+            belowLabel.setBorder(new EmptyBorder(10,20,20,20));
+            belowLabel.setLayout(new BorderLayout());
+                JPanel northOfBelowLabel = new JPanel();
+                northOfBelowLabel.setLayout(new GridLayout(0,3));
+                    JPanel firstColOfNorth = new JPanel();
+                    northOfBelowLabel.add(firstColOfNorth);
+
+                    JPanel secondColOfNorth = new JPanel();
+                    secondColOfNorth.setLayout(new BorderLayout());
+                    tfFinding = new JTextField(20);
+                    tfFinding.setFont(new Font("Serif",Font.ITALIC,16));
+                    tfFinding.setPreferredSize(new Dimension(0,30));
+                    secondColOfNorth.add(tfFinding, BorderLayout.CENTER);
+                    northOfBelowLabel.add(secondColOfNorth);
+
+                    JPanel thirdColOFNorth = new JPanel();
+                    thirdColOFNorth.setLayout(new BorderLayout());
+                    findButton = new JButton("FIND");
+                    thirdColOFNorth.add(findButton, BorderLayout.LINE_START);
+                    JPanel sureFindButton = new JPanel();
+                    thirdColOFNorth.add(sureFindButton, BorderLayout.CENTER);
+                    thirdColOFNorth.setBackground(Color.BLUE);
+                    northOfBelowLabel.add(thirdColOFNorth);
+                belowLabel.add(northOfBelowLabel, BorderLayout.NORTH);
+
+                JPanel belowOfFindField = new JPanel();
+                belowOfFindField.setBorder(new EmptyBorder(10,0,0,0));
+                belowOfFindField.setLayout(new GridLayout(2,0));
+
+                    JPanel firstRowOfField = new JPanel();
+                    firstRowOfField.setLayout(new GridLayout(0,2));
+                        //First col
+                        JPanel colDisplayInformation = new JPanel();
+                        colDisplayInformation.setLayout(new GridLayout(5,0));
+                            JPanel containIdBook = new JPanel();
+                            containIdBook.setLayout(new GridLayout(0,2));
+                            containIdBook.add(new JLabel("Id Book: ",SwingConstants.RIGHT));
+                            JPanel containJTextIDBook = new JPanel();
+                            containJTextIDBook.setLayout(new GridLayout(3,0));
+                            JPanel boxId1 = new JPanel();
+                            containJTextIDBook.add(boxId1);
+                            containJTextIDBook.add(new JTextField(20));
+                            JPanel boxId2 = new JPanel();
+                            containJTextIDBook.add(boxId2);
+                            containIdBook.add(containJTextIDBook);
+                            colDisplayInformation.add(containIdBook);
+
+                            JPanel containNameBook = new JPanel();
+                            containNameBook.setLayout(new GridLayout(0,2));
+                            containNameBook.add(new JLabel("Name Book: ", SwingConstants.RIGHT));
+                            JPanel containJTextNameBook = new JPanel();
+                            containJTextNameBook.setLayout(new GridLayout(3,0));
+                            JPanel boxName1 = new JPanel();
+                            containJTextNameBook.add(boxName1);
+                            containJTextNameBook.add(new JTextField(20));
+                            JPanel boxName2 = new JPanel();
+                            containJTextNameBook.add(boxName2);
+                            containNameBook.add(containJTextNameBook);
+                            colDisplayInformation.add(containNameBook);
+
+                            JPanel containPriceBook = new JPanel();
+                            containPriceBook.setLayout(new GridLayout(0,2));
+                            containPriceBook.add(new JLabel("Price Book: ", SwingConstants.RIGHT));
+                            JPanel containJTextPriceBook = new JPanel();
+                            containJTextPriceBook.setLayout(new GridLayout(3,0));
+                            JPanel boxPrice1 = new JPanel();
+                            containJTextPriceBook.add(boxPrice1);
+                            containJTextPriceBook.add(new JTextField(20));
+                            JPanel boxPrice2 = new JPanel();
+                            containJTextPriceBook.add(boxPrice2);
+                            containPriceBook.add(containJTextPriceBook);
+                            colDisplayInformation.add(containPriceBook);
+
+                            JPanel containAuthorNameBook = new JPanel();
+                            containAuthorNameBook.setLayout(new GridLayout(0,2));
+                            containAuthorNameBook.add(new JLabel("Name Author: ", SwingConstants.RIGHT));
+                            JPanel containJTextAuthorName = new JPanel();
+                            containJTextAuthorName.setLayout(new GridLayout(3,0));
+                            JPanel boxAuthorName1 = new JPanel();
+                            containJTextAuthorName.add(boxAuthorName1);
+                            containJTextAuthorName.add(new JTextField(20));
+                            JPanel boxAuthorName2 = new JPanel();
+                            containJTextAuthorName.add(boxAuthorName2);
+                            containAuthorNameBook.add(containJTextAuthorName);
+                            colDisplayInformation.add(containAuthorNameBook);
+
+                            JPanel containTypeOfBook = new JPanel();
+                            containTypeOfBook.setLayout(new GridLayout(0,2));
+                            containTypeOfBook.add(new JLabel("Type Book: ", SwingConstants.RIGHT));
+                            JPanel containJTextTypeBook = new JPanel();
+                            containJTextTypeBook.setLayout(new GridLayout(3,0));
+                            JPanel boxType1 = new JPanel();
+                            containJTextTypeBook.add(boxType1);
+                            containJTextTypeBook.add(new JTextField(20));
+                            JPanel boxType2 = new JPanel();
+                            containJTextTypeBook.add(boxType2);
+                            containTypeOfBook.add(containJTextTypeBook);
+                            colDisplayInformation.add(containTypeOfBook);
+                        firstRowOfField.add(colDisplayInformation);
+
+                        //Second col
+                        JPanel colDisplayImageAndBtnBorrow = new JPanel();
+                        colDisplayImageAndBtnBorrow.setLayout(new BorderLayout());
+                            JPanel containImage = new JPanel();
+                            containImage.setBorder(new EmptyBorder(10,100,10,100));
+                            containImage.setLayout(new BorderLayout());
+                            JLabel placeDisplayImage = new JLabel("Not has image here :(", SwingConstants.CENTER);
+                            placeDisplayImage.setBorder(BorderFactory.createLineBorder(Color.blue));
+                            containImage.add(placeDisplayImage, BorderLayout.CENTER);
+                            colDisplayImageAndBtnBorrow.add(containImage, BorderLayout.CENTER);
+
+                            JPanel containButton = new JPanel();
+                            containButton.setLayout(new GridLayout(0,3));
+                            JPanel row1Contain = new JPanel();
+                            containButton.add(row1Contain);
+                            JButton borrowBtn = new JButton("Borrow Book");
+                            borrowBtn.setPreferredSize(new Dimension(0,40));
+                            containButton.add(borrowBtn);
+                            JPanel row2Contain = new JPanel();
+                            containButton.add(row2Contain);
+                            colDisplayImageAndBtnBorrow.add(containButton, BorderLayout.SOUTH);
+
+                        firstRowOfField.add(colDisplayImageAndBtnBorrow);
+                    belowOfFindField.add(firstRowOfField);
+
+                    //This is the place contain JTable
+                    JPanel secondRowOfField = new JPanel();
+                    secondRowOfField.setLayout(new BorderLayout());
+                        JPanel comboboxContain = new JPanel();
+                        comboboxContain.setLayout(new GridLayout(0,3));
+                            JPanel comboBox1 = new JPanel();
+                            comboBox1.setLayout(new BorderLayout());
+                            comboBox1.add(new JLabel("Filter: ", SwingConstants.CENTER), BorderLayout.LINE_START);
+                            cb = new JComboBox(filterString);
+                            comboBox1.add(cb,BorderLayout.CENTER);
+                            comboboxContain.add(comboBox1);
+
+                            JPanel comboBox2 = new JPanel();
+                            comboboxContain.add(comboBox2);
+
+                            JPanel comboBox3 = new JPanel();
+                            comboboxContain.add(comboBox3);
+                        secondRowOfField.add(comboboxContain, BorderLayout.NORTH);
+
+                        JPanel tableContain = new JPanel();
+                        tableContain.setBorder(new EmptyBorder(10,0,0,0));
+                        tableContain.setLayout(new BorderLayout());
+                        DefaultTableModel testModel = new DefaultTableModel(column,0);
+                        jt = new JTable(testModel) {
+                            public boolean editCellAt(int row, int column, EventObject a) {return false;}
+                        };
+                        jt.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+                        JScrollPane scrollPane = new JScrollPane(jt);
+                        jt.setFillsViewportHeight(true);
+                        tableContain.add(scrollPane,BorderLayout.CENTER);
+                        secondRowOfField.add(tableContain, BorderLayout.CENTER);
+                    belowOfFindField.add(secondRowOfField);
+
+                belowLabel.add(belowOfFindField, BorderLayout.CENTER);
+
+            bookPanel.add(belowLabel, BorderLayout.CENTER);
+            cardPanel.add(bookPanel, NAMEBOOKCARD);
+        add(cardPanel, BorderLayout.CENTER);
 
         card.addCard(this, NAME);
     }
@@ -127,6 +327,17 @@ public class HomeUserPanel extends JPanel {
                     main.setLocationRelativeTo(null);
                     card.showCard(UIMain.NAMELOGIN);
                     break;
+                case NAMEBOOKCARD:
+                    System.out.println(NAMEBOOKCARD);
+                    cardLayout.show(cardPanel, NAMEBOOKCARD);
+                    break;
+                case BORROWBOOKCARD:
+                    System.out.println(BORROWBOOKCARD);
+                    break;
+                case INFORMATIONCARD:
+                    System.out.println(INFORMATIONCARD);
+                    break;
+
             }
         }
 
