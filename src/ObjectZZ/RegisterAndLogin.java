@@ -4,7 +4,6 @@ import DB.DBConnect;
 
 import javax.swing.*;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 
 public class RegisterAndLogin {
     String userName;
@@ -13,6 +12,7 @@ public class RegisterAndLogin {
     String typeOfUser;
     DBConnect zz;
     int checkInTheTwoField;
+    private int getID;
     public RegisterAndLogin(String userName, String password, String passwordAgain, String typeOfUser) {
         this.userName = userName;
         this.password = password;
@@ -24,6 +24,7 @@ public class RegisterAndLogin {
     public RegisterAndLogin(String userName, String password) {
         this.userName = userName;
         this.password = password;
+        this.zz = new DBConnect(3306, "javafinalimportant", "adminjava","Admin1234@");
     }
 
     public String getUserName() {
@@ -100,14 +101,6 @@ public class RegisterAndLogin {
         this.zz.threeCommand();
     }
 
-    private void insertIfTheUserNotInTheSystem() {
-        if(this.typeOfUser.equals("user")) {
-            executeInsert(2);
-        } else if(this.typeOfUser.equals("manager")) {
-            executeInsert(3);
-        }
-    }
-
     private void insertToTheDBAfterSetUserType() {
         if(getCheckInTheTwoField() == 2) {
             executeInsert(getCheckInTheTwoField());
@@ -126,11 +119,11 @@ public class RegisterAndLogin {
                                 displayWarningPassword("Choose another username.", "fail");
                             } else {
                                 if(this.typeOfUser.equals("user")) {
-                                    displayWarningPassword("Register success", "success");
+                                    displayWarningPassword("Register success.", "success");
                                     setCheckInTheTwoField(2);
                                     insertToTheDBAfterSetUserType();
                                 } else {
-                                    displayWarningPassword("Please wait for the admin to accept your request", "success");
+                                    displayWarningPassword("Register with manager success.", "success");
                                     setCheckInTheTwoField(3);
                                     insertToTheDBAfterSetUserType();
                                 }
@@ -161,24 +154,70 @@ public class RegisterAndLogin {
         }
     }
     //Public login method call
-    public void checkInLogin() {
+    public boolean checkInLogin() {
         if(!(checkUserName() || checkPasswordLogin())) {
             if(!isUserNameHasSpace()) {
                 if (isUserNameGreaterThan()) {
                     if (isItGreaterThan()) {
-                        //Do something
+                        if(checkUserInLoginWithUsrNameAndPassword()) {
+                            return true;
+                        } else {
+                            displayWarningPassword("Username or password is not correct.", "fail");
+                            return false;
+                        }
                     } else {
                         displayWarningPassword("Password must greater than 8.", "fail");
+                        return false;
                     }
                 } else {
                     displayWarningPassword("User name must greater than 6.", "fail");
+                    return false;
                 }
             } else {
                 displayWarningPassword("User name not contain space","fail");
+                return false;
             }
         } else {
             displayWarningPassword("Input all field.", "fail");
+            return false;
         }
+    }
+
+    private boolean checkUserInLoginWithUsrNameAndPassword() {
+        boolean checkLogin = false;
+        this.zz.setQuery("SELECT IdUser,Name,Password FROM User WHERE Name = '" + this.userName + "' AND Password = '" + this.password+"'");
+        ResultSet getResult = this.zz.selectFromDB();
+        //If this has record like field, then return true
+        try {
+            if (getResult.next()) {
+                getIdAfterCheckLogin(getResult.getInt("IdUser"));
+                checkLogin = true;
+            }
+        } catch (Exception ex) {ex.printStackTrace();}
+        return checkLogin;
+    }
+
+    private void getIdAfterCheckLogin(int getID) {
+        this.getID = getID;
+    }
+
+    private int getID() {
+        return this.getID;
+    }
+
+    public int checkUserType() {
+        int usrType = 0;
+        //2 is user, 3 is manager
+        this.zz.setQuery("SELECT * FROM Permissions WHERE IDUser=" + getID());
+        ResultSet getResult = this.zz.selectFromDB();
+        try {
+            if(getResult.next()) {
+                usrType = getResult.getInt("RoleID");
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return usrType;
     }
 
 }

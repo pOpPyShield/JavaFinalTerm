@@ -1,6 +1,8 @@
 package UI;
 
+import CardOfUIMain.CardPanel;
 import ObjectZZ.RegisterAndLogin;
+import UserUI.HomeUserPanel;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -18,9 +20,16 @@ import java.io.IOException;
 import java.net.URL;
 
 public class UIMain extends JFrame {
+    //Name of two card login and register
+    public static final String NAMELOGIN = "Login panel";
+    public static final String NAMEREG = "Register panel";
+    public static final String TITLE = "Library App";
+    public static final int WIDTH = 1100;
+    public static final int HEIGHT = 800;
+    //Student panel
+    HomeUserPanel homeUserPanel;
     //Card layout
-    JPanel cardLayout;
-
+    CardPanel cardPanel;
     //JLabel of card register
     JLabel labelCenter;
     //Login panel
@@ -43,16 +52,15 @@ public class UIMain extends JFrame {
             JButton btnReg;
     public UIMain() throws IOException {
         //setLayout(new GridLayout(0,2));
-        setSize(1100, 800);
+        setSize(WIDTH, HEIGHT);
         setLocationRelativeTo(null);
         setResizable(false);
         URL url = getClass().getResource("/Pictures/jframeIcon.png");
         ImageIcon icon = new ImageIcon(url);
         setIconImage(icon.getImage());
-        setTitle("Library Management");
+        setTitle(TITLE);
 
-        cardLayout = new JPanel();
-        cardLayout.setLayout(new CardLayout());
+        cardPanel = new CardPanel();
 
         JPanel card1 = new JPanel();
         card1.setLayout(new GridLayout(0, 2));
@@ -138,7 +146,7 @@ public class UIMain extends JFrame {
         rightPanel.add(insideRightPanelFirstRow);
         rightPanel.add(insideRightPanelSecondRow);
         card1.add(rightPanel);
-        cardLayout.add(card1, "Login panel");
+        cardPanel.add(card1, NAMELOGIN);
 
         //Card2
         JPanel card2 = new JPanel();
@@ -279,8 +287,11 @@ public class UIMain extends JFrame {
                 panelCenter.add(panelBelowLabel, BorderLayout.CENTER);
         card2.add(panelCenter, BorderLayout.CENTER);
         card2.add(panelContaiButton, BorderLayout.NORTH);
-        cardLayout.add(card2, "Register panel");
-        add(cardLayout);
+        cardPanel.add(card2, NAMEREG);
+        add(cardPanel);
+
+        //Create homeUserPanel
+        homeUserPanel = new HomeUserPanel(this,cardPanel);
 
         //Debug
         setDefaultLookAndFeelDecorated(true);
@@ -292,13 +303,12 @@ public class UIMain extends JFrame {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
             JButton button = (JButton) actionEvent.getSource();
-            CardLayout card = (CardLayout) (cardLayout.getLayout());
             RegisterAndLogin validateCheck;
             switch (button.getActionCommand()) {
                 //First frame of application
                 case "register switch":
                     System.out.println("Click on register");
-                    card.show(cardLayout, "Register panel");
+                    cardPanel.showCard(NAMEREG);
                     tfUserNameReg.setText("");
                     tfPasswordReg.setText("");
                     tfPasswordAgain.setText("");
@@ -306,26 +316,35 @@ public class UIMain extends JFrame {
                     break;
                 case "login switch":
                     System.out.println("Click on back to login");
-                    card.show(cardLayout,"Login panel");
+                    cardPanel.showCard(NAMELOGIN);
                     userNameTf.setText("");
                     passwordTf.setText("");
                     break;
                 case "handle register":
-                    validateCheck = new RegisterAndLogin(tfUserNameReg.getText(),tfPasswordReg.getText(),tfPasswordAgain.getText(),buttonGroupReg.getSelection().getActionCommand());
+                    validateCheck = new RegisterAndLogin(tfUserNameReg.getText(), tfPasswordReg.getText(), tfPasswordAgain.getText(), buttonGroupReg.getSelection().getActionCommand());
                     validateCheck.checkInRegisterTwoFieldMatch();
-                    if(validateCheck.getCheckInTheTwoField() == 2) {
+                    if (validateCheck.getCheckInTheTwoField() == 2 || validateCheck.getCheckInTheTwoField() == 3) {
                         userNameTf.setText(validateCheck.getUserName());
                         passwordTf.setText(validateCheck.getPassword());
                         radioBtn1.setSelected(true);
-                        card.show(cardLayout,"Login panel");
-                    } else {
-                        radioBtn1.setSelected(true);
-                        card.show(cardLayout,"Login panel");
+                        cardPanel.showCard(NAMELOGIN);
                     }
                     break;
                 case "handle login":
                     validateCheck = new RegisterAndLogin(userNameTf.getText(), passwordTf.getText());
-                    validateCheck.checkInLogin();
+                    if(validateCheck.checkInLogin()) {
+                        if(validateCheck.checkUserType() ==2) {
+                            setSize(1600,1000);
+                            setTitle(HomeUserPanel.TITLE);
+                            repaint();
+                            setLocationRelativeTo(null);
+                            cardPanel.showCard(HomeUserPanel.NAME);
+                        } else {
+
+                        }
+                    } else {
+                        System.out.println("no");
+                    }
                     break;
             }
         }
