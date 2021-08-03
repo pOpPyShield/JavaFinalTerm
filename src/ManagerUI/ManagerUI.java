@@ -23,8 +23,18 @@ public class ManagerUI extends JFrame {
         JTextField nameOfBook, priceOfBook;
         //Type cb box
         JComboBox cbType, cbAuthor, cbDay, cbMonth, cbYear;
-
-
+        //Display image in right
+        JLabel displayImage, nameOfBookImage;
+        //Button upload image
+        JButton btnUploadImage;
+        //Button add, update, delete
+        JButton btnAdd,btnUpdate,btnDelete;
+        //Search field
+        JTextField findField;
+        //Button find
+        JButton btnFind;
+        //Filter
+        JComboBox cbFilter;
     public ManagerUI(JFrame loginPanel) {
         UIMain castUI = (UIMain) loginPanel;
         managerAccount = castUI.getUserNameTf().getText();
@@ -41,8 +51,8 @@ public class ManagerUI extends JFrame {
         JTabbedPane tabbedPanel = new JTabbedPane();
             JPanel bookPanel = new JPanel();
             bookPanel.setLayout(new GridLayout(0,2));
-                JPanel splitTwoPanelInRight = new JPanel();
-                splitTwoPanelInRight.setLayout(new GridLayout(2,0));
+                JPanel splitTwoPanelInLeft = new JPanel();
+                splitTwoPanelInLeft.setLayout(new GridLayout(2,0));
                 //Contain JTextField
                 JPanel containInforBook = new JPanel();
                 containInforBook.setLayout(new GridLayout(4,0));
@@ -121,17 +131,175 @@ public class ManagerUI extends JFrame {
                         JPanel typeBox3 = new JPanel();
                         containType.add(typeBox3);
                     containInforBook.add(containType);
-                splitTwoPanelInRight.add(containInforBook);
+                splitTwoPanelInLeft.add(containInforBook);
 
                 //Button and search go here
                 JPanel btnAndSearchField = new JPanel();
-                splitTwoPanelInRight.add(btnAndSearchField);
+                btnAndSearchField.setLayout(new GridLayout(2,0));
+                    //Button
+                    JPanel containBtn = new JPanel();
+                    containBtn.setLayout(new GridLayout(0,2));
+                        JPanel boxContainBtn1 = new JPanel();
+                        containBtn.add(boxContainBtn1);
 
-                bookPanel.add(splitTwoPanelInRight);
+                        JPanel boxContainBtn2 = new JPanel();
+                        boxContainBtn2.setLayout(new GridLayout(0,3));
+                            //Btn add
+                            JPanel containBtnAdd = new JPanel();
+                            containBtnAdd.setLayout(new GridLayout(3,0));
+                                JPanel topAddBtn1 = new JPanel();
+                                topAddBtn1.setLayout(new BorderLayout());
+                                topAddBtn1.add(btnAdd = new JButton("Add"));
+                                containBtnAdd.add(topAddBtn1);
+
+                                JPanel topAddBtn2 = new JPanel();
+                                containBtnAdd.add(topAddBtn2);
+
+                                JPanel topAddBtn3 = new JPanel();
+                                containBtnAdd.add(topAddBtn3);
+                            boxContainBtn2.add(containBtnAdd);
+
+                            //Btn update
+                            JPanel containBtnUpdate = new JPanel();
+                            containBtnUpdate.setLayout(new GridLayout(3,0));
+                                JPanel topUpdateBtn1 = new JPanel();
+                                topUpdateBtn1.setLayout(new BorderLayout());
+                                topUpdateBtn1.add(btnUpdate = new JButton("Update"));
+                                containBtnUpdate.add(topUpdateBtn1);
+
+                                JPanel topUpdateBtn2 = new JPanel();
+                                containBtnUpdate.add(topUpdateBtn2);
+
+                                JPanel topUpdateBtn3 = new JPanel();
+                                containBtnUpdate.add(topUpdateBtn3);
+                            boxContainBtn2.add(containBtnUpdate);
+
+                            //Btn delete
+                            JPanel containBtnDelete = new JPanel();
+                            containBtnDelete.setLayout(new GridLayout(3,0));
+                                JPanel topDeleteBtn1 = new JPanel();
+                                topDeleteBtn1.setLayout(new BorderLayout());
+                                topDeleteBtn1.add(btnDelete = new JButton("Delete"));
+                                containBtnDelete.add(topDeleteBtn1);
+
+                                JPanel topDeleteBtn2 = new JPanel();
+                                containBtnDelete.add(topDeleteBtn2);
+
+                                JPanel topDeleteBtn3 = new JPanel();
+                                containBtnDelete.add(topDeleteBtn3);
+                            boxContainBtn2.add(containBtnDelete);
+                        containBtn.add(boxContainBtn2);
+                    btnAndSearchField.add(containBtn);
+
+                    //Search field
+                    JPanel containSearchField = new JPanel();
+                    containSearchField.setLayout(new GridLayout(2,0));
+                        JPanel row1OfContainSearchField = new JPanel();
+                        row1OfContainSearchField.setLayout(new GridLayout(0,3));
+                            JPanel leftOfSearchField = new JPanel();
+                            row1OfContainSearchField.add(leftOfSearchField);
+
+                            JPanel splitToTwo = new JPanel();
+                            splitToTwo.setLayout(new GridLayout(2,0));
+                                splitToTwo.add(findField = new JTextField(20));
+                                JPanel paddingFindField = new JPanel();
+                                splitToTwo.add(paddingFindField);
+                            row1OfContainSearchField.add(splitToTwo);
+
+                            JPanel rightOfSearchField = new JPanel();
+                            rightOfSearchField.setLayout(new GridLayout(0,3));
+                                JPanel containBtnFind1 = new JPanel();
+                                containBtnFind1.setLayout(new GridLayout(2,0));
+                                    containBtnFind1.add(btnFind = new JButton("Find"));
+                                    JPanel paddingOfBtnFind = new JPanel();
+                                    containBtnFind1.add(paddingOfBtnFind);
+                                rightOfSearchField.add(containBtnFind1);
+
+                                JPanel colRightOFSearchField = new JPanel();
+                                rightOfSearchField.add(colRightOFSearchField);
+
+                                JPanel colFinalOfSearchField = new JPanel();
+                                rightOfSearchField.add(colFinalOfSearchField);
+                            row1OfContainSearchField.add(rightOfSearchField);
+                        containSearchField.add(row1OfContainSearchField);
+
+                        //Filter place
+                        JPanel row2OfContainSearchField = new JPanel();
+                        containSearchField.add(row2OfContainSearchField);
+                    btnAndSearchField.add(containSearchField);
+                splitTwoPanelInLeft.add(btnAndSearchField);
+
+                bookPanel.add(splitTwoPanelInLeft);
                 //Contain image
                 JPanel containImageBook = new JPanel();
-                containImageBook.setLayout(new BorderLayout());
-                containImageBook.add(new JLabel("Image here", SwingConstants.CENTER),BorderLayout.CENTER);
+                containImageBook.setBorder(new EmptyBorder(10,0,10,0));
+                containImageBook.setLayout(new GridLayout(2,0));
+                    //row 1
+                    JPanel rowFirstRight = new JPanel();
+                    rowFirstRight.setLayout(new GridLayout(0,3));
+                        //col 1
+                        JPanel firstRightBox1 = new JPanel();
+                        rowFirstRight.add(firstRightBox1);
+                        //col 2 contain image
+                        JPanel firstRightBox2 = new JPanel();
+                        firstRightBox2.setLayout(new BorderLayout());
+                        displayImage = new JLabel("Don't have image here :(.", SwingConstants.CENTER);
+                        displayImage.setBorder(BorderFactory.createLineBorder(Color.BLUE));
+                        firstRightBox2.add(displayImage, BorderLayout.CENTER);
+                        rowFirstRight.add(firstRightBox2);
+                        //col 3
+                        JPanel firstRightBox3 = new JPanel();
+                        rowFirstRight.add(firstRightBox3);
+                    containImageBook.add(rowFirstRight);
+
+                    //row 2
+                    JPanel rowSecondRight = new JPanel();
+                    rowSecondRight.setBorder(new EmptyBorder(10,0,0,0));
+                    rowSecondRight.setLayout(new BorderLayout());
+                        //North
+                        JPanel northOfRowSecond = new JPanel();
+                        northOfRowSecond.setLayout(new GridLayout(0,3));
+                            //Col 1
+                            JPanel rowSecondBoxNorth1 = new JPanel();
+                            northOfRowSecond.add(rowSecondBoxNorth1);
+                            //Col 2
+                            JPanel rowSecondBoxNorth2 = new JPanel();
+                            rowSecondBoxNorth2.setLayout(new BorderLayout());
+                            rowSecondBoxNorth2.add(nameOfBookImage = new JLabel("", SwingConstants.CENTER));
+                            northOfRowSecond.add(rowSecondBoxNorth2);
+                            //Col 3
+                            JPanel rowSecondBoxNorth3 = new JPanel();
+                            northOfRowSecond.add(rowSecondBoxNorth3);
+                        rowSecondRight.add(northOfRowSecond, BorderLayout.NORTH);
+
+                        //Center
+                        JPanel centerOfRowSecond = new JPanel();
+                        centerOfRowSecond.setBorder(new EmptyBorder(10,0,0,0));
+                        centerOfRowSecond.setLayout(new GridLayout(3,0));
+                            JPanel containBtnUpload = new JPanel();
+                            containBtnUpload.setLayout(new GridLayout(0,5));
+                                JPanel btnUploadBox1 = new JPanel();
+                                containBtnUpload.add(btnUploadBox1);
+                                JPanel btnUploadBox2 = new JPanel();
+                                containBtnUpload.add(btnUploadBox2);
+
+                                JPanel btnUploadBox3 = new JPanel();
+                                btnUploadBox3.setLayout(new BorderLayout());
+                                btnUploadImage = new JButton("Upload");
+                                btnUploadBox3.add(btnUploadImage, BorderLayout.CENTER);
+                                containBtnUpload.add(btnUploadBox3);
+
+                                JPanel btnUploadBox4 = new JPanel();
+                                containBtnUpload.add(btnUploadBox4);
+                                JPanel btnUploadBox5 = new JPanel();
+                                containBtnUpload.add(btnUploadBox5);
+                            centerOfRowSecond.add(containBtnUpload);
+                            JPanel containBtnUpload2 = new JPanel();
+                            centerOfRowSecond.add(containBtnUpload2);
+                            JPanel containBtnUpload3 = new JPanel();
+                            centerOfRowSecond.add(containBtnUpload3);
+                        rowSecondRight.add(centerOfRowSecond, BorderLayout.CENTER);
+                    containImageBook.add(rowSecondRight);
                 bookPanel.add(containImageBook);
             tabbedPanel.add(bookPanel, BOOKPANELTAB);
 
