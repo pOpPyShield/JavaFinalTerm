@@ -13,11 +13,10 @@ public class BorrowPanel extends JPanel {
     JTextField idOfBook, nameOfBook, priceOfBook, typeOfBook;
 
     //Jlabel display image
-    JLabel whereContainImageAboutBook;
+    JLabel whereContainImageAboutBook, displayNameBelowImage;
+
     //JCombobox date borrow
-    JComboBox day;
-    JComboBox month;
-    JComboBox year;
+    JComboBox day,month,year;
 
     //JRadioButton
     JRadioButton radioBtn1, radioBtn2;
@@ -113,6 +112,7 @@ public class BorrowPanel extends JPanel {
                     JPanel containDateBorrowSection = new JPanel();
                     containDateBorrowSection.setLayout(new GridLayout(0,3));
                         JPanel containDayComboBox = new JPanel();
+                        containDayComboBox.setBorder(new EmptyBorder(0,0,0,10));
                         containDayComboBox.setLayout(new GridLayout(3,0));
                         JPanel boxOfComboBox1 = new JPanel();
                         containDayComboBox.add(boxOfComboBox1);
@@ -123,6 +123,7 @@ public class BorrowPanel extends JPanel {
                         containDateBorrowSection.add(containDayComboBox);
 
                         JPanel containMonthComboBox = new JPanel();
+                        containMonthComboBox.setBorder(new EmptyBorder(0,0,0,10));
                         containMonthComboBox.setLayout(new GridLayout(3,0));
                         JPanel boxOfComboBoxMonth1 = new JPanel();
                         containMonthComboBox.add(boxOfComboBoxMonth1);
@@ -173,10 +174,10 @@ public class BorrowPanel extends JPanel {
                 JPanel colRightContainImage = new JPanel();
                 colRightContainImage.setBorder(new EmptyBorder(10,100,10,100));
                 colRightContainImage.setLayout(new BorderLayout());
-                whereContainImageAboutBook = new JLabel("Don't have any image :(", SwingConstants.CENTER);
+                whereContainImageAboutBook = new JLabel("Don't have image :(", SwingConstants.CENTER);
                 whereContainImageAboutBook.setBorder(BorderFactory.createLineBorder(Color.blue));
                 colRightContainImage.add(whereContainImageAboutBook, BorderLayout.CENTER);
-                JLabel displayNameBelowImage = new JLabel("Choose a row.", SwingConstants.CENTER);
+                displayNameBelowImage = new JLabel("Choose a row.", SwingConstants.CENTER);
                 colRightContainImage.add(displayNameBelowImage, BorderLayout.SOUTH);
                 topPanelContainInformation.add(colRightContainImage);
             belowLabel.add(topPanelContainInformation);
@@ -201,5 +202,16 @@ public class BorrowPanel extends JPanel {
     private void showRadioButton() {}
     public void showBorrowPanel() {
         cardLayout.show(cardPanel, HomeUserPanel.BORROWBOOKCARD);
+    }
+    public void clearBorrowPanel() {
+        idOfBook.setText("");
+        nameOfBook.setText("");
+        priceOfBook.setText("");
+        typeOfBook.setText("");
+        whereContainImageAboutBook.setText("Don't have image :(");
+        day.setSelectedIndex(-1);
+        month.setSelectedIndex(-1);
+        year.setSelectedIndex(-1);
+        displayNameBelowImage.setText("Choose a row.");
     }
 }

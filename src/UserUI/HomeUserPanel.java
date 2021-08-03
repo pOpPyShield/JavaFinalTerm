@@ -18,7 +18,7 @@ public class HomeUserPanel extends JPanel {
     public static final String BORROWBOOKCARD = "Borrow panel";
     public static final String INFORMATIONCARD = "Information panel";
     private CardPanel card;
-    private JFrame main;
+    private UIMain main;
     //Left panel
     private JButton exitToLoginPanel, bookBtn, borrowBtn, informationBtn;
 
@@ -45,6 +45,8 @@ public class HomeUserPanel extends JPanel {
 
     //Borrow panel depend on Jpanel card layout
     BorrowPanel componentBorrowBookPanel;
+    //Information panel depend on JPanel card Layout
+    InformationPanel componentInformationPanel;
     public HomeUserPanel(UIMain main, CardPanel card) {
         this.card = card;
         this.main = main;
@@ -59,12 +61,7 @@ public class HomeUserPanel extends JPanel {
         Color topColor = new Color(250,148,32);
         topPanel.setBackground(topColor);
         topPanel.add(studentPlace, BorderLayout.CENTER);
-        /*
-        exitToLoginPanel = new JButton("Exit");
-        exitToLoginPanel.setActionCommand("Exit");
-        exitToLoginPanel.addActionListener(new ButtonActionListener());
-        topPanel.add(exitToLoginPanel);
-         */
+
         add(topPanel, BorderLayout.NORTH);
 
         JPanel leftPanel = new JPanel();
@@ -272,7 +269,7 @@ public class HomeUserPanel extends JPanel {
                             JPanel containImage = new JPanel();
                             containImage.setBorder(new EmptyBorder(10,100,10,100));
                             containImage.setLayout(new BorderLayout());
-                            placeDisplayImage = new JLabel("Not has image here :(", SwingConstants.CENTER);
+                            placeDisplayImage = new JLabel("Don't have image here :(", SwingConstants.CENTER);
                             placeDisplayImage.setBorder(BorderFactory.createLineBorder(Color.blue));
                             containImage.add(placeDisplayImage, BorderLayout.CENTER);
                             colDisplayImageAndBtnBorrow.add(containImage, BorderLayout.CENTER);
@@ -330,7 +327,7 @@ public class HomeUserPanel extends JPanel {
             bookPanel.add(belowLabel, BorderLayout.CENTER);
             cardPanel.add(bookPanel, NAMEBOOKCARD);
             componentBorrowBookPanel = new BorrowPanel(this);
-
+            componentInformationPanel = new InformationPanel(this);
         add(cardPanel, BorderLayout.CENTER);
 
         card.addCard(this, NAME);
@@ -342,12 +339,18 @@ public class HomeUserPanel extends JPanel {
     public CardLayout getCardLayout() {
         return this.cardLayout;
     }
+
     private class ButtonActionListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
             JButton button = (JButton) actionEvent.getSource();
             switch (button.getActionCommand()) {
                 case "Exit":
+                    //Book section
+                    clearAllInformationFieldAfterLogout();
+                    //Borrow section
+                    componentBorrowBookPanel.clearBorrowPanel();
+
                     main.setSize(UIMain.WIDTH, UIMain.HEIGHT);
                     main.setTitle(UIMain.TITLE);
                     main.repaint();
@@ -355,19 +358,31 @@ public class HomeUserPanel extends JPanel {
                     card.showCard(UIMain.NAMELOGIN);
                     break;
                 case NAMEBOOKCARD:
-                    System.out.println(NAMEBOOKCARD);
+
                     cardLayout.show(cardPanel, NAMEBOOKCARD);
                     break;
                 case BORROWBOOKCARD:
+
                     componentBorrowBookPanel.showBorrowPanel();
                     cb.setSelectedIndex(-1);
                     break;
                 case INFORMATIONCARD:
-                    System.out.println(INFORMATIONCARD);
+                    componentInformationPanel.showInformationPanel();
+                    System.out.println(main.getUserNameTf().getText());
                     break;
 
             }
         }
-
+        private void clearAllInformationFieldAfterLogout() {
+            tfFinding.setText("");
+            idBook.setText("");
+            nameBook.setText("");
+            priceBook.setText("");
+            nameAuthor.setText("");
+            typeBook.setText("");
+            placeDisplayImage.setText("Don't have image here");
+            cb.setSelectedIndex(-1);
+        }
     }
+
 }

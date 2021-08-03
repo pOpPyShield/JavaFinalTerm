@@ -1,6 +1,7 @@
 package UI;
 
 import CardOfUIMain.CardPanel;
+import ManagerUI.ManagerUI;
 import ObjectZZ.RegisterAndLogin;
 import UserUI.HomeUserPanel;
 
@@ -299,6 +300,13 @@ public class UIMain extends JFrame {
         setVisible(true);
     }
 
+    public JTextField getUserNameTf() {
+        return userNameTf;
+    }
+
+    public JFrame getLoginJFrame() {
+        return this;
+    }
     private class ButtonActionListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
@@ -340,7 +348,8 @@ public class UIMain extends JFrame {
                             setLocationRelativeTo(null);
                             cardPanel.showCard(HomeUserPanel.NAME);
                         } else {
-
+                            dispose();
+                            new ManagerUI(getLoginJFrame());
                         }
                     } else {
                         System.out.println("no");
