@@ -3,8 +3,14 @@ package ManagerUI;
 import UI.UIMain;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.util.EventObject;
+import java.util.List;
 import java.util.jar.JarEntry;
 
 public class ManagerUI extends JFrame {
@@ -17,7 +23,10 @@ public class ManagerUI extends JFrame {
 
     //Card layout
     CardLayout cardLayout;
+    JPanel cardPanel;
 
+    //Tabbed panel
+    JTabbedPane tabbedPanel;
     //Information book
         //Label display name of book
         JTextField nameOfBook, priceOfBook;
@@ -35,6 +44,14 @@ public class ManagerUI extends JFrame {
         JButton btnFind;
         //Filter
         JComboBox cbFilter;
+        String[] stringTheFilterHas = {"Author name", "Type", "Price"};
+    //JTable of information book
+        JTable jt;
+        String[] column = {"ID of book", "Name of book", "Price", "Author name", "Day add", "Type"};
+    //Set title line border with each tab in table
+        JPanel panelWithLineTitle;
+    //Author management panel
+        AuthorManagement authorManager;
     public ManagerUI(JFrame loginPanel) {
         UIMain castUI = (UIMain) loginPanel;
         managerAccount = castUI.getUserNameTf().getText();
@@ -43,12 +60,18 @@ public class ManagerUI extends JFrame {
         setResizable(false);
         setTitle(TITLEMANAGER);
         setLayout(new GridLayout(2,0));
+        //Initialize card panel
+        cardPanel = new JPanel();
+        cardLayout = new CardLayout();
+        cardPanel.setLayout(cardLayout);
 
         //Book manager
         //Author manager
         //Student manager
         //Borrow manager
-        JTabbedPane tabbedPanel = new JTabbedPane();
+        tabbedPanel = new JTabbedPane();
+        tabbedPanel.addChangeListener(new TabbedChangeListener());
+        tabbedPanel.setBorder(new EmptyBorder(10,20,10,20));
             JPanel bookPanel = new JPanel();
             bookPanel.setLayout(new GridLayout(0,2));
                 JPanel splitTwoPanelInLeft = new JPanel();
@@ -195,36 +218,26 @@ public class ManagerUI extends JFrame {
                     JPanel containSearchField = new JPanel();
                     containSearchField.setLayout(new GridLayout(2,0));
                         JPanel row1OfContainSearchField = new JPanel();
-                        row1OfContainSearchField.setLayout(new GridLayout(0,3));
-                            JPanel leftOfSearchField = new JPanel();
-                            row1OfContainSearchField.add(leftOfSearchField);
-
-                            JPanel splitToTwo = new JPanel();
-                            splitToTwo.setLayout(new GridLayout(2,0));
-                                splitToTwo.add(findField = new JTextField(20));
-                                JPanel paddingFindField = new JPanel();
-                                splitToTwo.add(paddingFindField);
-                            row1OfContainSearchField.add(splitToTwo);
-
-                            JPanel rightOfSearchField = new JPanel();
-                            rightOfSearchField.setLayout(new GridLayout(0,3));
-                                JPanel containBtnFind1 = new JPanel();
-                                containBtnFind1.setLayout(new GridLayout(2,0));
-                                    containBtnFind1.add(btnFind = new JButton("Find"));
-                                    JPanel paddingOfBtnFind = new JPanel();
-                                    containBtnFind1.add(paddingOfBtnFind);
-                                rightOfSearchField.add(containBtnFind1);
-
-                                JPanel colRightOFSearchField = new JPanel();
-                                rightOfSearchField.add(colRightOFSearchField);
-
-                                JPanel colFinalOfSearchField = new JPanel();
-                                rightOfSearchField.add(colFinalOfSearchField);
-                            row1OfContainSearchField.add(rightOfSearchField);
                         containSearchField.add(row1OfContainSearchField);
 
                         //Filter place
                         JPanel row2OfContainSearchField = new JPanel();
+                        row2OfContainSearchField.setLayout(new GridLayout(0,2));
+                            JPanel leftPanelOfFilter = new JPanel();
+                            leftPanelOfFilter.setLayout(new GridLayout(2,0));
+                                JPanel firstRowOfFilter = new JPanel();
+                                leftPanelOfFilter.add(firstRowOfFilter);
+
+                                JPanel paddingFirstRowOfFilter = new JPanel();
+                                paddingFirstRowOfFilter.setLayout(new BorderLayout());
+                                paddingFirstRowOfFilter.add(new JLabel("Filter: ", SwingConstants.LEFT), BorderLayout.LINE_START);
+                                paddingFirstRowOfFilter.add(cbFilter = new JComboBox(stringTheFilterHas), BorderLayout.CENTER);
+                                cbFilter.setSelectedIndex(-1);
+                                leftPanelOfFilter.add(paddingFirstRowOfFilter);
+                            row2OfContainSearchField.add(leftPanelOfFilter);
+
+                            JPanel rightPanelOfFilter = new JPanel();
+                            row2OfContainSearchField.add(rightPanelOfFilter);
                         containSearchField.add(row2OfContainSearchField);
                     btnAndSearchField.add(containSearchField);
                 splitTwoPanelInLeft.add(btnAndSearchField);
@@ -303,22 +316,108 @@ public class ManagerUI extends JFrame {
                 bookPanel.add(containImageBook);
             tabbedPanel.add(bookPanel, BOOKPANELTAB);
 
-            JPanel authorManager = new JPanel();
-            tabbedPanel.add(authorManager, AUTHORTAB);
-            JPanel studentPanel = new JPanel();
-            tabbedPanel.add(studentPanel, STUDENTTAB);
-            JPanel borrowPanel = new JPanel();
-            tabbedPanel.add(borrowPanel, BORROWTAB);
-        add(tabbedPanel);
+
 
         //The place where the JTable go with
-        JPanel cardPanel = new JPanel();
-        cardLayout = new CardLayout();
-        cardPanel.setLayout(cardLayout);
+        JPanel containJTableInformationBook = new JPanel();
+        Border paneEdge = BorderFactory.createEmptyBorder(0,20,10,20);
+        containJTableInformationBook.setBorder(paneEdge);
+        containJTableInformationBook.setLayout(new BorderLayout());
+            panelWithLineTitle = new JPanel();
+            panelWithLineTitle.setLayout(new BorderLayout());
+                JPanel containFindTextField = new JPanel();
+                containFindTextField.setLayout(new GridLayout(0,3));
+                    JPanel firstPanelPaddingOfFind = new JPanel();
+                    containFindTextField.add(firstPanelPaddingOfFind);
 
+                    containFindTextField.add(findField = new JTextField(20));
+
+                    JPanel thirdPanelPaddingOfFind = new JPanel();
+                    thirdPanelPaddingOfFind.setLayout(new GridLayout(0,6));
+                    thirdPanelPaddingOfFind.add(btnFind = new JButton("Find"));
+                    thirdPanelPaddingOfFind.add(new JLabel(""));
+                    thirdPanelPaddingOfFind.add(new JLabel(""));
+                    thirdPanelPaddingOfFind.add(new JLabel(""));
+                    thirdPanelPaddingOfFind.add(new JLabel(""));
+                    thirdPanelPaddingOfFind.add(new JLabel(""));
+                    containFindTextField.add(thirdPanelPaddingOfFind);
+                panelWithLineTitle.add(containFindTextField, BorderLayout.NORTH);
+
+                JPanel containTable = new JPanel();
+                containTable.setLayout(new BorderLayout());
+                containTable.setBorder(new EmptyBorder(10,10,10,10));
+                DefaultTableModel model = new DefaultTableModel(column,0);
+                jt = new JTable(model) {
+                    public boolean editCellAt(int row, int column, EventObject eventObject) {return false;}
+                };
+                jt.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+                JScrollPane scrollPane = new JScrollPane(jt);
+                jt.setFillsViewportHeight(true);
+                containTable.add(scrollPane, BorderLayout.CENTER);
+                panelWithLineTitle.add(containTable, BorderLayout.CENTER);
+            panelWithLineTitle.setBorder(BorderFactory.createTitledBorder(BOOKPANELTAB));
+            containJTableInformationBook.add(panelWithLineTitle);
+        cardPanel.add(containJTableInformationBook, BOOKPANELTAB);
+
+        authorManager = new AuthorManagement(this);
+        //Initialize tab
+        tabbedPanel.add(authorManager, AUTHORTAB);
+        JPanel studentPanel = new JPanel();
+        tabbedPanel.add(studentPanel, STUDENTTAB);
+        JPanel borrowPanel = new JPanel();
+        tabbedPanel.add(borrowPanel, BORROWTAB);
+        add(tabbedPanel);
         add(cardPanel);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setVisible(true);
+    }
 
+    public CardLayout getCardLayout() {
+        return cardLayout;
+    }
+
+    public JPanel getCardPanel() {
+        return cardPanel;
+    }
+
+    public void clearManagerUI() {
+        nameOfBook.setText("");
+        priceOfBook.setText("");
+
+        //Image
+        displayImage.setText("");
+        nameOfBook.setText("");
+
+        //Find field
+        findField.setText("");
+
+        //Cb box
+        cbFilter.setSelectedIndex(-1);
+        cbAuthor.setSelectedIndex(-1);
+        cbYear.setSelectedIndex(-1);
+        cbMonth.setSelectedIndex(-1);
+        cbDay.setSelectedIndex(-1);
+        cbType.setSelectedIndex(-1);
+    }
+
+    private class TabbedChangeListener implements ChangeListener {
+        @Override
+        public void stateChanged(ChangeEvent changeEvent) {
+            switch (tabbedPanel.getSelectedIndex()) {
+                case 0:
+                    cardLayout.show(cardPanel,BOOKPANELTAB);
+                    break;
+                case 1:
+                    clearManagerUI();
+                    authorManager.showAuthorManagementPanel();
+                    break;
+                case 2:
+                    clearManagerUI();
+                    break;
+                case 3:
+                    clearManagerUI();
+                    break;
+            }
+        }
     }
 }
