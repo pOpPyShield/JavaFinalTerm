@@ -1,17 +1,29 @@
 package ManagerUI;
 
+import JFileChooserCustom.ImageFileView;
+import JFileChooserCustom.ImageFilter;
+import JFileChooserCustom.ImagePreview;
+import ObjectZZ.Author;
+import ObjectZZ.Book;
+import TreeModelCustom.VstTableItemModel;
 import UI.UIMain;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 import java.awt.*;
+import java.awt.event.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.EventObject;
-import java.util.List;
-import java.util.jar.JarEntry;
 
 public class ManagerUI extends JFrame {
     String managerAccount;
@@ -32,6 +44,10 @@ public class ManagerUI extends JFrame {
         JTextField nameOfBook, priceOfBook;
         //Type cb box
         JComboBox cbType, cbAuthor, cbDay, cbMonth, cbYear;
+            //String inside cbType
+            String[] typeElement = {"Science", "Mathematical", "Literature", "Comics", "Programmer", "Historical", "Geographical", "Physic", "Biology"};
+            //String inside cbAuthor
+            Author[] authorTest = {new Author("Le van"), new Author("Bless")};
         //Display image in right
         JLabel displayImage, nameOfBookImage;
         //Button upload image
@@ -48,10 +64,20 @@ public class ManagerUI extends JFrame {
     //JTable of information book
         JTable jt;
         String[] column = {"ID of book", "Name of book", "Price", "Author name", "Day add", "Type"};
+        VstTableItemModel customModel;
+        ArrayList<Book> bookTest;
+        TableRowSorter<VstTableItemModel> sorter;
     //Set title line border with each tab in table
         JPanel panelWithLineTitle;
     //Author management panel
         AuthorManagement authorManager;
+    //JFileChooser
+        private JFileChooser fc;
+
+    //Button listener to get field and initialize
+        private Author author;
+        private String type;
+        private File imgFile;
     public ManagerUI(JFrame loginPanel) {
         UIMain castUI = (UIMain) loginPanel;
         managerAccount = castUI.getUserNameTf().getText();
@@ -113,7 +139,10 @@ public class ManagerUI extends JFrame {
                             containJTextFieldPriceOfBook.add(priceOfBook = new JTextField(20));
                             JPanel boxPrice1 = new JPanel();
                             containJTextFieldPriceOfBook.add(boxPrice1);
-                            containJTextFieldPriceOfBook.add(cbAuthor = new JComboBox());
+                            containJTextFieldPriceOfBook.add(cbAuthor = new JComboBox(authorTest));
+                            cbAuthor.setActionCommand("Cb Author");
+                            cbAuthor.addActionListener(new ButtonListener());
+                            cbAuthor.setSelectedIndex(-1);
                         containPrice.add(containJTextFieldPriceOfBook);
                     containInforBook.add(containPrice);
 
@@ -130,10 +159,13 @@ public class ManagerUI extends JFrame {
                             JPanel cbDayBox2 = new JPanel();
                             cbDayBox2.setLayout(new GridLayout(0,3));
                             cbDayBox2.add(cbDay = new JComboBox());
+                            cbDay.setEnabled(false);
                             cbDay.setBorder(new EmptyBorder(0,0,0,10));
                             cbDayBox2.add(cbMonth = new JComboBox());
+                            cbMonth.setEnabled(false);
                             cbMonth.setBorder(new EmptyBorder(0,0,0,10));
                             cbDayBox2.add(cbYear = new JComboBox());
+                            cbYear.setEnabled(false);
                             containCBDay.add(cbDayBox2, BorderLayout.CENTER);
                         dayAddBox2.add(containCBDay);
                         containDayAdd.add(dayAddBox2);
@@ -147,7 +179,10 @@ public class ManagerUI extends JFrame {
                         JPanel typeBox1 = new JPanel();
                         typeBox1.setLayout(new GridLayout(0,2));
                         typeBox1.add(new JLabel("Type: ", SwingConstants.RIGHT));
-                        typeBox1.add(cbType = new JComboBox());
+                        typeBox1.add(cbType = new JComboBox(typeElement));
+                        cbType.setActionCommand("Cb Type");
+                        cbType.addActionListener(new ButtonListener());
+                        cbType.setSelectedIndex(-1);
                         containType.add(typeBox1);
                         JPanel typeBox2 = new JPanel();
                         containType.add(typeBox2);
@@ -173,6 +208,8 @@ public class ManagerUI extends JFrame {
                                 JPanel topAddBtn1 = new JPanel();
                                 topAddBtn1.setLayout(new BorderLayout());
                                 topAddBtn1.add(btnAdd = new JButton("Add"));
+                                btnAdd.setActionCommand("Add book");
+                                btnAdd.addActionListener(new ButtonListener());
                                 containBtnAdd.add(topAddBtn1);
 
                                 JPanel topAddBtn2 = new JPanel();
@@ -232,6 +269,8 @@ public class ManagerUI extends JFrame {
                                 paddingFirstRowOfFilter.setLayout(new BorderLayout());
                                 paddingFirstRowOfFilter.add(new JLabel("Filter: ", SwingConstants.LEFT), BorderLayout.LINE_START);
                                 paddingFirstRowOfFilter.add(cbFilter = new JComboBox(stringTheFilterHas), BorderLayout.CENTER);
+                                cbFilter.setActionCommand("Cb filter");
+
                                 cbFilter.setSelectedIndex(-1);
                                 leftPanelOfFilter.add(paddingFirstRowOfFilter);
                             row2OfContainSearchField.add(leftPanelOfFilter);
@@ -299,6 +338,8 @@ public class ManagerUI extends JFrame {
                                 JPanel btnUploadBox3 = new JPanel();
                                 btnUploadBox3.setLayout(new BorderLayout());
                                 btnUploadImage = new JButton("Upload");
+                                btnUploadImage.setActionCommand("Choose image");
+                                btnUploadImage.addActionListener(new ButtonListener());
                                 btnUploadBox3.add(btnUploadImage, BorderLayout.CENTER);
                                 containBtnUpload.add(btnUploadBox3);
 
@@ -346,11 +387,17 @@ public class ManagerUI extends JFrame {
                 JPanel containTable = new JPanel();
                 containTable.setLayout(new BorderLayout());
                 containTable.setBorder(new EmptyBorder(10,10,10,10));
-                DefaultTableModel model = new DefaultTableModel(column,0);
-                jt = new JTable(model) {
+                bookTest = new ArrayList<>();
+                customModel= new VstTableItemModel(bookTest,column);
+                jt = new JTable(customModel) {
                     public boolean editCellAt(int row, int column, EventObject eventObject) {return false;}
                 };
+                sorter = new TableRowSorter<>(customModel);
+                jt.setRowSorter(sorter);
+                cbFilter.addActionListener(new ButtonListener());
+                findField.addKeyListener(new KeyListenerFind());
                 jt.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+                jt.addMouseListener(new MouseClickRow());
                 JScrollPane scrollPane = new JScrollPane(jt);
                 jt.setFillsViewportHeight(true);
                 containTable.add(scrollPane, BorderLayout.CENTER);
@@ -385,7 +432,7 @@ public class ManagerUI extends JFrame {
         priceOfBook.setText("");
 
         //Image
-        displayImage.setText("");
+        displayImage.setIcon(null);
         nameOfBook.setText("");
 
         //Find field
@@ -394,9 +441,9 @@ public class ManagerUI extends JFrame {
         //Cb box
         cbFilter.setSelectedIndex(-1);
         cbAuthor.setSelectedIndex(-1);
-        cbYear.setSelectedIndex(-1);
-        cbMonth.setSelectedIndex(-1);
-        cbDay.setSelectedIndex(-1);
+        cbYear.removeAllItems();
+        cbMonth.removeAllItems();
+        cbDay.removeAllItems();
         cbType.setSelectedIndex(-1);
     }
 
@@ -406,9 +453,11 @@ public class ManagerUI extends JFrame {
             switch (tabbedPanel.getSelectedIndex()) {
                 case 0:
                     cardLayout.show(cardPanel,BOOKPANELTAB);
+                    if(authorManager != null) {
+                        authorManager.clearUI();
+                    }
                     break;
                 case 1:
-                    clearManagerUI();
                     authorManager.showAuthorManagementPanel();
                     break;
                 case 2:
@@ -419,5 +468,230 @@ public class ManagerUI extends JFrame {
                     break;
             }
         }
+    }
+
+    private class ButtonListener implements ActionListener {
+
+        @Override
+        public void actionPerformed(ActionEvent actionEvent) {
+            if(actionEvent.getSource() instanceof JButton) {
+                JButton btn = (JButton) actionEvent.getSource();
+                switch (btn.getActionCommand()) {
+                    case "Choose image":
+                        displayChooseFile();
+                        break;
+                    case "Add book":
+                        if(validateFieldBeforeInsert()) {
+                            if(!validateElementEqual()) {
+                                addBook();
+                                clearManagerUI();
+                            } else {
+                                JOptionPane.showMessageDialog(getParent(),"Already has a book with this name, try another");
+                            }
+                        }
+                        break;
+                }
+            } else if(actionEvent.getSource() instanceof JComboBox) {
+                JComboBox cb = (JComboBox) actionEvent.getSource();
+                switch (cb.getActionCommand()) {
+                    case "Cb Author":
+                        author = (Author) cb.getSelectedItem();
+                        break;
+                    case "Cb Type":
+                        type = (String) cb.getSelectedItem();
+                        break;
+                    case "Cb filter":
+                        if(cbFilter.getSelectedIndex() != -1) {
+                            DefaultRowSorter sorter = ((DefaultRowSorter) jt.getRowSorter());
+                            ArrayList<RowSorter.SortKey> sortKeys = new ArrayList<>();
+                            String columnChoose = cbFilter.getSelectedItem().toString();
+                            switch (columnChoose) {
+                                case "Author name":
+                                    sortKeys.add(new RowSorter.SortKey(3, SortOrder.ASCENDING));
+                                    break;
+                                case "Type":
+                                    sortKeys.add(new RowSorter.SortKey(5, SortOrder.ASCENDING));
+                                    break;
+                                case "Price":
+                                    sortKeys.add(new RowSorter.SortKey(2, SortOrder.ASCENDING));
+                                    break;
+                            }
+                            sorter.setSortKeys(sortKeys);
+                        }
+                        /*
+                        sorter.setRowFilter(new RowFilter<VstTableItemModel, Integer>() {
+                            @Override
+                            public boolean include(Entry<? extends VstTableItemModel, ? extends Integer> entry) {
+                                return entry.getValue(0).toString().contains(cbFilter.getSelectedItem().toString());
+                            }
+                        });
+
+                         */
+                        break;
+                }
+            }
+        }
+        private boolean validateFieldBeforeInsert() {
+            if(nameOfBook.getText().isEmpty()) {
+                JOptionPane.showMessageDialog(getParent(),"Name can not be empty, try again.");
+                return false;
+            } else if (priceOfBook.getText().isEmpty()) {
+                JOptionPane.showMessageDialog(getParent(), "Price can not be empty, try again");
+                return false;
+            } else if(cbAuthor.getSelectedIndex() == -1) {
+                JOptionPane.showMessageDialog(getParent(), "Choose author.");
+                return false;
+            } else if(cbType.getSelectedIndex() == -1) {
+                JOptionPane.showMessageDialog(getParent(), "Choose type.");
+                return false;
+            } else if(displayImage.getIcon() == null) {
+                JOptionPane.showMessageDialog(getParent(), "Choose image.");
+                return false;
+            } else if(nameOfBook.getText().isEmpty() && priceOfBook.getText().isEmpty() && cbAuthor.getSelectedIndex() == -1 &&
+                       cbType.getSelectedIndex() == -1 || displayImage.getIcon() == null ) {
+                JOptionPane.showMessageDialog(getParent(), "Input all the field.");
+                return false;
+            }else {
+                return true;
+            }
+        }
+        private void displayChooseFile() {
+            if(fc == null) {
+                fc = new JFileChooser();
+                //Add a custom file filter and disable the default
+                //(Accept All) file filter.
+                fc.addChoosableFileFilter(new ImageFilter());
+                fc.setAcceptAllFileFilterUsed(false);
+
+                //Add custom icons for file types.
+                fc.setFileView(new ImageFileView());
+
+                //Add the preview pane.
+                fc.setAccessory(new ImagePreview(fc));
+            }
+            //Show it.
+            int returnVal = fc.showDialog(getParent(),
+                    "Attach");
+            //Process the results.
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                imgFile = fc.getSelectedFile();
+                BufferedImage img = null;
+                try {
+                    img = ImageIO.read(imgFile);
+                }catch (Exception e) {e.printStackTrace();}
+                ImageIcon imageIcon = new ImageIcon(fitImage(img,displayImage.getWidth(),displayImage.getHeight()));
+                displayImage.setIcon(imageIcon);
+            } else {
+                System.out.println("Attachment cancelled by user.");
+            }
+            //Reset the file chooser for the next time it's shown.
+            fc.setSelectedFile(null);
+        }
+        private void addBook() {
+            String nameBook = nameOfBook.getText();
+            float priceBook = Float.parseFloat(priceOfBook.getText());
+            Date date = new Date();
+            int idOfBookDisplay = bookTest.size()+1;
+            Book bookAdd = new Book(idOfBookDisplay,nameBook,priceBook,author,date,type, imgFile);
+            customModel.addRow(bookAdd);
+            customModel.refresh(bookTest);
+        }
+
+        private boolean validateElementEqual() {
+            boolean checkElement = false;
+            for(Book zz : bookTest) {
+                if(zz.getNameOfBook().equals(nameOfBook.getText())) {
+                    checkElement = true;
+                    break;
+                }
+            }
+            return checkElement;
+        }
+
+    }
+    private class KeyListenerFind implements KeyListener {
+        @Override
+        public void keyTyped(KeyEvent keyEvent) {
+
+        }
+
+        @Override
+        public void keyPressed(KeyEvent keyEvent) {
+
+        }
+
+        @Override
+        public void keyReleased(KeyEvent keyEvent) {
+            findBook(findField.getText());
+        }
+
+        private void findBook(String searchName) {
+            sorter.setRowFilter(RowFilter.regexFilter(searchName));
+        }
+    }
+
+    private class MouseClickRow implements MouseListener {
+        @Override
+        public void mouseClicked(MouseEvent mouseEvent) {
+            int i = jt.getSelectedRow();
+            TableModel model = jt.getModel();
+            nameOfBook.setText(model.getValueAt(i,1).toString());
+            priceOfBook.setText(model.getValueAt(i,2).toString());
+            for(int z = 0;z<cbAuthor.getItemCount();z++) {
+                if(cbAuthor.getItemAt(z).toString().contains(model.getValueAt(i,3).toString())) {
+                    cbAuthor.setSelectedIndex(z);
+                    break;
+                }
+            }
+            String[] splitString = model.getValueAt(i,4).toString().split("/");
+            String day = splitString[0];
+            cbDay.addItem(day);
+            String month = splitString[1];
+            cbMonth.addItem(month);
+            String year = splitString[2];
+            cbYear.addItem(year);
+            for(int g = 0;g<cbType.getItemCount();g++) {
+                if(cbType.getItemAt(g).toString().contains(model.getValueAt(i,5).toString())) {
+                    cbType.setSelectedIndex(g);
+                    break;
+                }
+            }
+            imgFile = (File) model.getValueAt(i,6);
+            BufferedImage img = null;
+            try {
+                img = ImageIO.read(imgFile);
+            }catch (Exception e) {e.printStackTrace();}
+            ImageIcon imageIcon = new ImageIcon(fitImage(img,displayImage.getWidth(),displayImage.getHeight()));
+            displayImage.setIcon(imageIcon);
+        }
+
+
+        @Override
+        public void mousePressed(MouseEvent mouseEvent) {
+
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent mouseEvent) {
+
+        }
+
+        @Override
+        public void mouseEntered(MouseEvent mouseEvent) {
+
+        }
+
+        @Override
+        public void mouseExited(MouseEvent mouseEvent) {
+
+        }
+    }
+    private Image fitImage(Image img, int w, int h) {
+        BufferedImage resizedImage = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g2 = resizedImage.createGraphics();
+        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g2.drawImage(img, 0, 0, w, h, null);
+        g2.dispose();
+        return resizedImage;
     }
 }

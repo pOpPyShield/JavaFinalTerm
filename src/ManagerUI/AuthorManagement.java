@@ -10,7 +10,7 @@ public class AuthorManagement extends JPanel {
     //This is to add the jtree of the author management
     private CardLayout cardLayout;
     private JPanel cardPanel;
-
+    private ManagerUI uiMain;
     //Display image
     JLabel displayImageLabel;
 
@@ -35,6 +35,7 @@ public class AuthorManagement extends JPanel {
     public AuthorManagement(ManagerUI cardLayout) {
         this.cardLayout = cardLayout.getCardLayout();
         this.cardPanel = cardLayout.getCardPanel();
+        this.uiMain = cardLayout;
         setLayout(new GridLayout(2,0));
         JPanel containImageOfAuthor = new JPanel();
         containImageOfAuthor.setLayout(new GridLayout(0,3));
@@ -136,6 +137,7 @@ public class AuthorManagement extends JPanel {
     }
     public void showAuthorManagementPanel() {
         cardLayout.show(cardPanel, ManagerUI.AUTHORTAB);
+        this.uiMain.clearManagerUI();
     }
 
     public void clearUI() {
