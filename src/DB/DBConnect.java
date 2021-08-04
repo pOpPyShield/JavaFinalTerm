@@ -14,6 +14,11 @@ public class DBConnect {
     ResultSet rs;
     Statement stmt;
     String query;
+
+    public Connection getConn() {
+        return conn;
+    }
+
     public DBConnect(int port, String db, String account, String pwd) {
         this.port = String.valueOf(port);
         this.db = db;

@@ -1,18 +1,40 @@
 package ObjectZZ;
 
+import java.io.File;
 import java.io.FileInputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class Author {
+    private int idAuthor;
     private String nameOfAuthor;
-    private String day,month,year;
+    private Date date;
     private byte[] image;
 
-    public Author(String nameOfAuthor, String day, String month, String year, byte[] image) {
+    //Id in sql
+    private int idSql;
+    public Author(int idAuthorMySql, String nameOfAuthor, Date date, byte[] image) {
         this.nameOfAuthor = nameOfAuthor;
-        this.day = day;
-        this.month = month;
-        this.year = year;
+        this.date = date;
         this.image = image;
+        this.idSql = idAuthorMySql;
+    }
+
+
+    public int getIdAuthor() {
+        return idAuthor;
+    }
+
+    public void setIdAuthor(int idAuthor) {
+        this.idAuthor = idAuthor;
+    }
+
+    public int getIdSql() {
+        return idSql;
+    }
+
+    public void setIdSql(int idSql) {
+        this.idSql = idSql;
     }
 
     public Author(String name) {
@@ -26,30 +48,6 @@ public class Author {
         this.nameOfAuthor = nameOfAuthor;
     }
 
-    public String getDay() {
-        return day;
-    }
-
-    public void setDay(String day) {
-        this.day = day;
-    }
-
-    public String getMonth() {
-        return month;
-    }
-
-    public void setMonth(String month) {
-        this.month = month;
-    }
-
-    public String getYear() {
-        return year;
-    }
-
-    public void setYear(String year) {
-        this.year = year;
-    }
-
     public byte[] getImage() {
         return image;
     }
@@ -58,9 +56,22 @@ public class Author {
         this.image = image;
     }
 
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
+
+    public String displayDate() {
+        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+        return formatter.format(this.date);
+    }
     @Override
     public String toString() {
         return nameOfAuthor;
     }
+
 
 }
