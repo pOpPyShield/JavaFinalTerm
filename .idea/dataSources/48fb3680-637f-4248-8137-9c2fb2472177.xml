@@ -993,62 +993,62 @@ javafinalimportant|schema||adminjava|localhost|UPDATE|G</Grants>
       <DataType>int|0s</DataType>
       <NotNull>1</NotNull>
     </column>
-    <index id="305" parent="279" name="BookInfor_IDBook_uindex">
+    <column id="305" parent="279" name="TypeBook">
+      <Position>7</Position>
+      <DataType>varchar(50)|0s</DataType>
+      <NotNull>1</NotNull>
+    </column>
+    <index id="306" parent="279" name="BookInfor_IDBook_uindex">
       <ColNames>IDBook</ColNames>
       <Unique>1</Unique>
       <Type>btree</Type>
     </index>
-    <index id="306" parent="279" name="BookInfor_AuthorInfor_AuthorID_fk">
+    <index id="307" parent="279" name="BookInfor_AuthorInfor_AuthorID_fk">
       <ColNames>AuthorID</ColNames>
       <Type>btree</Type>
     </index>
-    <index id="307" parent="279" name="BookInfor_User_IdUser_fk">
+    <index id="308" parent="279" name="BookInfor_User_IdUser_fk">
       <ColNames>IDUser</ColNames>
       <Type>btree</Type>
     </index>
-    <key id="308" parent="279" name="PRIMARY">
+    <key id="309" parent="279" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <ColNames>IDBook</ColNames>
       <Primary>1</Primary>
     </key>
-    <key id="309" parent="279" name="BookInfor_IDBook_uindex">
+    <key id="310" parent="279" name="BookInfor_IDBook_uindex">
       <ColNames>IDBook</ColNames>
       <UnderlyingIndexName>BookInfor_IDBook_uindex</UnderlyingIndexName>
     </key>
-    <foreign-key id="310" parent="279" name="BookInfor_AuthorInfor_AuthorID_fk">
+    <foreign-key id="311" parent="279" name="BookInfor_AuthorInfor_AuthorID_fk">
       <ColNames>AuthorID</ColNames>
       <RefTableName>AuthorInfor</RefTableName>
       <RefColNames>AuthorID</RefColNames>
     </foreign-key>
-    <foreign-key id="311" parent="279" name="BookInfor_User_IdUser_fk">
+    <foreign-key id="312" parent="279" name="BookInfor_User_IdUser_fk">
       <ColNames>IDUser</ColNames>
       <RefTableName>User</RefTableName>
       <RefColNames>IdUser</RefColNames>
     </foreign-key>
-    <column id="312" parent="280" name="AuthorId">
+    <column id="313" parent="280" name="AuthorId">
       <Position>1</Position>
       <DataType>int|0s</DataType>
       <NotNull>1</NotNull>
     </column>
-    <column id="313" parent="280" name="IDBook">
+    <column id="314" parent="280" name="IDBook">
       <Position>2</Position>
       <DataType>int|0s</DataType>
       <NotNull>1</NotNull>
     </column>
-    <column id="314" parent="280" name="Image">
+    <column id="315" parent="280" name="Image">
       <Position>3</Position>
       <DataType>mediumblob|0s</DataType>
       <NotNull>1</NotNull>
     </column>
-    <index id="315" parent="280" name="BookOfAuthor_AuthorInfor_AuthorID_fk">
+    <index id="316" parent="280" name="BookOfAuthor_AuthorInfor_AuthorID_fk">
       <ColNames>AuthorId</ColNames>
       <Type>btree</Type>
     </index>
-    <foreign-key id="316" parent="280" name="BookOfAuthor_AuthorInfor_AuthorID_fk">
-      <ColNames>AuthorId</ColNames>
-      <RefTableName>AuthorInfor</RefTableName>
-      <RefColNames>AuthorID</RefColNames>
-    </foreign-key>
     <column id="317" parent="281" name="IDUser">
       <Position>1</Position>
       <DataType>int|0s</DataType>

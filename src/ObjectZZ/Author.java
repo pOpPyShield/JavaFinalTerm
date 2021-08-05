@@ -20,7 +20,12 @@ public class Author {
         this.idSql = idAuthorMySql;
     }
 
+    public Author(int idAuthorMysql, String nameOfAuthor) {
+        this.idSql = idAuthorMysql;
+        this.nameOfAuthor = nameOfAuthor;
+    }
 
+    public Author() {}
     public int getIdAuthor() {
         return idAuthor;
     }

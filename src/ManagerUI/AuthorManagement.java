@@ -9,21 +9,17 @@ import kotlin.reflect.jvm.internal.impl.protobuf.ByteString;
 
 import javax.imageio.ImageIO;
 import javax.imageio.stream.ImageInputStream;
+import javax.sql.rowset.serial.SerialBlob;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -60,6 +56,8 @@ public class AuthorManagement extends JPanel {
         //JFileChooser
         private JFileChooser fc;
         private File imgFile;
+        private InputStream imageDisplay;
+        private Blob imageInsertSQL;
         //Panel contain component above
         JPanel containJTablePanel;
         Connection getConnect;
@@ -203,6 +201,7 @@ public class AuthorManagement extends JPanel {
                 };
                 sorter = new TableRowSorter<>(authorTableModel);
                 jt.setRowSorter(sorter);
+                findTf.addKeyListener(new KeyListenerFind());
                 jt.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
                 jt.addMouseListener(new ClickRowListener());
                 JScrollPane scrollPane = new JScrollPane(jt);
@@ -271,6 +270,9 @@ public class AuthorManagement extends JPanel {
         //Process the results.
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             imgFile = fc.getSelectedFile();
+            try {
+                imageDisplay = new FileInputStream(imgFile);
+            } catch (Exception ex) {ex.printStackTrace();}
             BufferedImage img = null;
             try {
                 img = ImageIO.read(imgFile);
@@ -311,7 +313,12 @@ public class AuthorManagement extends JPanel {
                     break;
                 }
             }
-            InputStream imageDisplay = new ByteArrayInputStream((byte[]) authorTableModel.getValueAt(i,3));
+            imageDisplay = new ByteArrayInputStream((byte[]) authorTableModel.getValueAt(i,3));
+            try {
+                imageInsertSQL = new SerialBlob((byte[]) authorTableModel.getValueAt(i,3));
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
             BufferedImage img = null;
             try {
                 img = ImageIO.read(imageDisplay);
@@ -368,6 +375,7 @@ public class AuthorManagement extends JPanel {
                     case "Delete":
                         if(idSql != -1) {
                             deleteAuthor();
+                            clearUI();
                         } else {
                             JOptionPane.showMessageDialog(getParent(), "Choose a row before update.");
                         }
@@ -405,8 +413,7 @@ public class AuthorManagement extends JPanel {
                 pstmt.setString(1,nameAuthor.getText());
                 java.sql.Date dateInsertToSQL = new java.sql.Date(dateAdd.getTime());
                 pstmt.setDate(2, dateInsertToSQL);
-                InputStream in = new FileInputStream(imgFile);
-                pstmt.setBlob(3,in);
+                pstmt.setBlob(3,imageDisplay);
                 pstmt.executeUpdate();
             }catch (Exception ex) {ex.printStackTrace();}
             clearTheTableAfterOperation();
@@ -423,15 +430,13 @@ public class AuthorManagement extends JPanel {
                 pstmt.setString(1,nameAuthor.getText());
                 java.sql.Date dateUpdateToSQL = new java.sql.Date(dateAdd.getTime());
                 pstmt.setDate(2,dateUpdateToSQL);
-                InputStream in = new FileInputStream(imgFile);
-                pstmt.setBlob(3,in);
+                pstmt.setBlob(3, imageInsertSQL);
                 pstmt.setInt(4,idSql);
                 pstmt.executeUpdate();
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
             clearTheTableAfterOperation();
-
         }
 
         private void deleteAuthor() {
@@ -472,4 +477,24 @@ public class AuthorManagement extends JPanel {
         return zauZau;
     }
 
+    private class KeyListenerFind implements KeyListener {
+        @Override
+        public void keyTyped(KeyEvent keyEvent) {
+
+        }
+
+        @Override
+        public void keyPressed(KeyEvent keyEvent) {
+
+        }
+
+        @Override
+        public void keyReleased(KeyEvent keyEvent) {
+            findBook(findTf.getText());
+        }
+
+        private void findBook(String searchName) {
+            sorter.setRowFilter(RowFilter.regexFilter(searchName));
+        }
+    }
 }

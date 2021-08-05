@@ -12,16 +12,29 @@ public class Book {
     private Author author;
     private Date date;
     private String type;
-    private File image;
-
-    public Book(int IDBook, String nameOfBook, float price, Author author, Date date, String type, File image) {
-        this.IDBook = IDBook;
+    private byte[] image;
+    private int idBookSQL;
+    public Book(int IDBookSQL, String nameOfBook, float price, Author author, Date date, String type, byte[] image) {
+        this.idBookSQL = IDBookSQL;
         NameOfBook = nameOfBook;
         this.price = price;
         this.author = author;
         this.date = date;
         this.type = type;
         this.image = image;
+    }
+
+
+    public void setPrice(float price) {
+        this.price = price;
+    }
+
+    public int getIdBookSQL() {
+        return idBookSQL;
+    }
+
+    public void setIdBookSQL(int idBookSQL) {
+        this.idBookSQL = idBookSQL;
     }
 
     public int getIDBook() {
@@ -72,11 +85,11 @@ public class Book {
         this.type = type;
     }
 
-    public File getImage() {
+    public byte[] getImage() {
         return image;
     }
 
-    public void setImage(File image) {
+    public void setImage(byte[] image) {
         this.image = image;
     }
 

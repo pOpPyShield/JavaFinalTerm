@@ -1,5 +1,6 @@
 package ManagerUI;
 
+import DB.DBConnect;
 import JFileChooserCustom.ImageFileView;
 import JFileChooserCustom.ImageFilter;
 import JFileChooserCustom.ImagePreview;
@@ -9,6 +10,7 @@ import TreeModelCustom.VstTableItemModel;
 import UI.UIMain;
 
 import javax.imageio.ImageIO;
+import javax.sql.rowset.serial.SerialBlob;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
@@ -20,10 +22,16 @@ import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.EventObject;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.sql.Blob;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.*;
+import java.util.List;
 
 public class ManagerUI extends JFrame {
     String managerAccount;
@@ -47,7 +55,8 @@ public class ManagerUI extends JFrame {
             //String inside cbType
             String[] typeElement = {"Science", "Mathematical", "Literature", "Comics", "Programmer", "Historical", "Geographical", "Physic", "Biology"};
             //String inside cbAuthor
-            Author[] authorTest = {new Author("Le van"), new Author("Bless")};
+            List<Author> authorArr;
+            Vector<Author> passToCbAuthor;
         //Display image in right
         JLabel displayImage, nameOfBookImage;
         //Button upload image
@@ -73,12 +82,23 @@ public class ManagerUI extends JFrame {
         AuthorManagement authorManager;
     //JFileChooser
         private JFileChooser fc;
-
+        private File imgFile;
+        private InputStream imageDisplay;
+        private Blob imageInsertSQL;
+        private int idSql = -1;
     //Button listener to get field and initialize
         private Author author;
         private String type;
-        private File imgFile;
+    //DB Connect
+        private DBConnect connectDB;
+        private Connection connection;
+        private PreparedStatement pstmt;
     public ManagerUI(JFrame loginPanel) {
+        this.connectDB = new DBConnect(3306,"javafinalimportant","adminjava","Admin1234@");
+        connection = connectDB.getConn();
+        authorArr = new ArrayList<>();
+        initializeAuthor();
+        passToCbAuthor = new Vector<>(authorArr);
         UIMain castUI = (UIMain) loginPanel;
         managerAccount = castUI.getUserNameTf().getText();
         setSize(1500, 900);
@@ -139,7 +159,7 @@ public class ManagerUI extends JFrame {
                             containJTextFieldPriceOfBook.add(priceOfBook = new JTextField(20));
                             JPanel boxPrice1 = new JPanel();
                             containJTextFieldPriceOfBook.add(boxPrice1);
-                            containJTextFieldPriceOfBook.add(cbAuthor = new JComboBox(authorTest));
+                            containJTextFieldPriceOfBook.add(cbAuthor = new JComboBox(passToCbAuthor));
                             cbAuthor.setActionCommand("Cb Author");
                             cbAuthor.addActionListener(new ButtonListener());
                             cbAuthor.setSelectedIndex(-1);
@@ -225,6 +245,8 @@ public class ManagerUI extends JFrame {
                                 JPanel topUpdateBtn1 = new JPanel();
                                 topUpdateBtn1.setLayout(new BorderLayout());
                                 topUpdateBtn1.add(btnUpdate = new JButton("Update"));
+                                btnUpdate.setActionCommand("Update book");
+                                btnUpdate.addActionListener(new ButtonListener());
                                 containBtnUpdate.add(topUpdateBtn1);
 
                                 JPanel topUpdateBtn2 = new JPanel();
@@ -240,6 +262,8 @@ public class ManagerUI extends JFrame {
                                 JPanel topDeleteBtn1 = new JPanel();
                                 topDeleteBtn1.setLayout(new BorderLayout());
                                 topDeleteBtn1.add(btnDelete = new JButton("Delete"));
+                                btnDelete.setActionCommand("Delete book");
+                                btnDelete.addActionListener(new ButtonListener());
                                 containBtnDelete.add(topDeleteBtn1);
 
                                 JPanel topDeleteBtn2 = new JPanel();
@@ -267,7 +291,7 @@ public class ManagerUI extends JFrame {
 
                                 JPanel paddingFirstRowOfFilter = new JPanel();
                                 paddingFirstRowOfFilter.setLayout(new BorderLayout());
-                                paddingFirstRowOfFilter.add(new JLabel("Filter: ", SwingConstants.LEFT), BorderLayout.LINE_START);
+                                paddingFirstRowOfFilter.add(new JLabel("Order: ", SwingConstants.LEFT), BorderLayout.LINE_START);
                                 paddingFirstRowOfFilter.add(cbFilter = new JComboBox(stringTheFilterHas), BorderLayout.CENTER);
                                 cbFilter.setActionCommand("Cb filter");
 
@@ -375,7 +399,7 @@ public class ManagerUI extends JFrame {
 
                     JPanel thirdPanelPaddingOfFind = new JPanel();
                     thirdPanelPaddingOfFind.setLayout(new GridLayout(0,6));
-                    thirdPanelPaddingOfFind.add(btnFind = new JButton("Find"));
+                    thirdPanelPaddingOfFind.add(new JLabel("Find", SwingConstants.CENTER));
                     thirdPanelPaddingOfFind.add(new JLabel(""));
                     thirdPanelPaddingOfFind.add(new JLabel(""));
                     thirdPanelPaddingOfFind.add(new JLabel(""));
@@ -387,7 +411,7 @@ public class ManagerUI extends JFrame {
                 JPanel containTable = new JPanel();
                 containTable.setLayout(new BorderLayout());
                 containTable.setBorder(new EmptyBorder(10,10,10,10));
-                bookTest = new ArrayList<>();
+                bookTest = initializeBook();
                 customModel= new VstTableItemModel(bookTest,column);
                 jt = new JTable(customModel) {
                     public boolean editCellAt(int row, int column, EventObject eventObject) {return false;}
@@ -490,6 +514,20 @@ public class ManagerUI extends JFrame {
                             }
                         }
                         break;
+                    case "Update book":
+                        if(idSql != -1) {
+                            if(validateFieldBeforeInsert()) {
+
+                                clearManagerUI();
+                                JOptionPane.showMessageDialog(getParent(), "Update success");
+                            }
+                        } else {
+                            JOptionPane.showMessageDialog(getParent(), "Please choose a row.");
+                        }
+                        break;
+                    case "Delete book":
+                        break;
+
                 }
             } else if(actionEvent.getSource() instanceof JComboBox) {
                 JComboBox cb = (JComboBox) actionEvent.getSource();
@@ -518,15 +556,6 @@ public class ManagerUI extends JFrame {
                             }
                             sorter.setSortKeys(sortKeys);
                         }
-                        /*
-                        sorter.setRowFilter(new RowFilter<VstTableItemModel, Integer>() {
-                            @Override
-                            public boolean include(Entry<? extends VstTableItemModel, ? extends Integer> entry) {
-                                return entry.getValue(0).toString().contains(cbFilter.getSelectedItem().toString());
-                            }
-                        });
-
-                         */
                         break;
                 }
             }
@@ -575,6 +604,9 @@ public class ManagerUI extends JFrame {
             //Process the results.
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 imgFile = fc.getSelectedFile();
+                try {
+                    imageDisplay = new FileInputStream(imgFile);
+                } catch (Exception ex) {ex.printStackTrace();}
                 BufferedImage img = null;
                 try {
                     img = ImageIO.read(imgFile);
@@ -587,16 +619,47 @@ public class ManagerUI extends JFrame {
             //Reset the file chooser for the next time it's shown.
             fc.setSelectedFile(null);
         }
+
         private void addBook() {
             String nameBook = nameOfBook.getText();
             float priceBook = Float.parseFloat(priceOfBook.getText());
             Date date = new Date();
-            int idOfBookDisplay = bookTest.size()+1;
-            Book bookAdd = new Book(idOfBookDisplay,nameBook,priceBook,author,date,type, imgFile);
-            customModel.addRow(bookAdd);
-            customModel.refresh(bookTest);
-        }
+            //int idOfBookDisplay = bookTest.size()+1;
+            int idUser = getIdUser();
+            try {
+                pstmt = connection.prepareStatement("INSERT INTO BookInfor(NameOfBook, Price, AuthorID, DayAdd, IDUser, TypeBook) VALUES (?,?,?,?,?,?)");
+                pstmt.setString(1,nameBook);
+                pstmt.setFloat(2,priceBook);
+                pstmt.setInt(3,author.getIdSql());
+                java.sql.Date dateUpdateToSQL = new java.sql.Date(date.getTime());
+                pstmt.setDate(4,dateUpdateToSQL);
+                pstmt.setInt(5,idUser);
+                pstmt.setString(6, type);
+                pstmt.executeUpdate();
+            }catch (Exception ex) {ex.printStackTrace();}
 
+            try {
+                pstmt = connection.prepareStatement("INSERT INTO BookOfAuthor(AuthorId, IDBook, Image) VALUES (?,LAST_INSERT_ID(),?)");
+                pstmt.setInt(1,idUser);
+                pstmt.setBlob(2,imageDisplay);
+                pstmt.executeUpdate();
+            } catch (Exception ex) {ex.printStackTrace();}
+        }
+        private void updateBook() {
+
+        }
+        private int getIdUser() {
+            int idUser = 0;
+            try {
+                pstmt = connection.prepareStatement("SELECT IdUser FROM User WHERE Name=?");
+                pstmt.setString(1, managerAccount);
+                ResultSet rs = pstmt.executeQuery();
+                while (rs.next()) {
+                    idUser = rs.getInt("IdUser");
+                }
+            } catch (Exception ex) {ex.printStackTrace();}
+            return idUser;
+        }
         private boolean validateElementEqual() {
             boolean checkElement = false;
             for(Book zz : bookTest) {
@@ -609,6 +672,58 @@ public class ManagerUI extends JFrame {
         }
 
     }
+    //Initialize array of book
+    private ArrayList<Book> initializeBook() {
+        ArrayList<Book> zauzau = new ArrayList<>();
+        int idDisplay = 0;
+        connectDB.setQuery("SELECT BookInfor.IDBook, BookInfor.NameOfBook, BookInfor.Price, BookInfor.AuthorID, BookInfor.DayAdd, BookInfor.IDUser, BookInfor.TypeBook, BookOfAuthor.Image FROM BookInfor INNER JOIN BookOfAuthor ON  BookInfor.IDBook = BookOfAuthor.IDBook");
+        ResultSet rs = connectDB.selectFromDB();
+        try {
+            while (rs.next()) {
+                idDisplay++;
+                int idBookSql = rs.getInt("IDBook");
+                String nameOfBook = rs.getString("NameOfBook");
+                float price = rs.getFloat("Price");
+                int authorId = rs.getInt("AuthorID");
+                Date dateAdd = rs.getDate("DayAdd");
+                String typeBook = rs.getString("TypeBook");
+                byte[] image = rs.getBytes("Image");
+                Book goGo = new Book(idBookSql,nameOfBook,price, initializeOneAuthor(authorId),dateAdd,typeBook,image);
+                goGo.setIDBook(idDisplay);
+                zauzau.add(goGo);
+            }
+        } catch (Exception ex) {ex.printStackTrace();}
+        return zauzau;
+    }
+    //Initialize one author
+    private Author initializeOneAuthor(int idAuthor) {
+        Author go = new Author();
+        DBConnect zz = new DBConnect(3306,"javafinalimportant","adminjava","Admin1234@");
+        Connection connection = zz.getConn();
+        try {
+            PreparedStatement pstmt = connection.prepareStatement("SELECT AuthorID, NameAuthor FROM AuthorInfor WHERE AuthorID =?");
+            pstmt.setInt(1,idAuthor);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                go.setIdAuthor(rs.getInt("AuthorID"));
+                go.setNameOfAuthor(rs.getString("NameAuthor"));
+            }
+        }catch (Exception ex) {ex.printStackTrace();}
+        return go;
+    }
+    //Initialize array author
+    private void initializeAuthor() {
+        connectDB.setQuery("SELECT * FROM AuthorInfor");
+        ResultSet rs = connectDB.selectFromDB();
+        try {
+            while (rs.next()) {
+                int idAuthorMysql = rs.getInt("AuthorID");
+                String nameAuthor = rs.getString("NameAuthor");
+                authorArr.add(new Author(idAuthorMysql,nameAuthor));
+            }
+        } catch (Exception ex) {ex.printStackTrace();}
+    }
+
     private class KeyListenerFind implements KeyListener {
         @Override
         public void keyTyped(KeyEvent keyEvent) {
@@ -634,6 +749,7 @@ public class ManagerUI extends JFrame {
         @Override
         public void mouseClicked(MouseEvent mouseEvent) {
             int i = jt.getSelectedRow();
+            idSql = jt.getSelectedRow();
             TableModel model = jt.getModel();
             nameOfBook.setText(model.getValueAt(i,1).toString());
             priceOfBook.setText(model.getValueAt(i,2).toString());
@@ -656,10 +772,13 @@ public class ManagerUI extends JFrame {
                     break;
                 }
             }
-            imgFile = (File) model.getValueAt(i,6);
+            imageDisplay = new ByteArrayInputStream((byte[]) model.getValueAt(i,6));
+            try {
+                imageInsertSQL = new SerialBlob((byte[]) model.getValueAt(i,6));
+            } catch (Exception ex) {ex.printStackTrace();}
             BufferedImage img = null;
             try {
-                img = ImageIO.read(imgFile);
+                img = ImageIO.read(imageDisplay);
             }catch (Exception e) {e.printStackTrace();}
             ImageIcon imageIcon = new ImageIcon(fitImage(img,displayImage.getWidth(),displayImage.getHeight()));
             displayImage.setIcon(imageIcon);
