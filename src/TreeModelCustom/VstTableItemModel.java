@@ -14,6 +14,11 @@ public class VstTableItemModel extends AbstractTableModel {
         this.object = object;
         this.column = column;
     }
+
+    public void setObject(List<Book> object) {
+        this.object = object;
+    }
+
     @Override
     public int getRowCount() {
         return this.object.size();
@@ -53,6 +58,10 @@ public class VstTableItemModel extends AbstractTableModel {
                 case 6:
                     value = bookSee.getImage();
                     break;
+                case 7:
+                    value = bookSee.getIdBookSQL();
+                    break;
+
             }
         return value;
     }

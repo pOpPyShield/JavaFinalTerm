@@ -19,6 +19,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.nio.file.Files;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -273,6 +274,13 @@ public class AuthorManagement extends JPanel {
             try {
                 imageDisplay = new FileInputStream(imgFile);
             } catch (Exception ex) {ex.printStackTrace();}
+            try {
+                imageInsertSQL = new SerialBlob(Files.readAllBytes(imgFile.toPath()));
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             BufferedImage img = null;
             try {
                 img = ImageIO.read(imgFile);
@@ -360,6 +368,7 @@ public class AuthorManagement extends JPanel {
                         if(validateField()) {
                             addAuthor();
                             clearUI();
+                            uiMain.refreshCBAuthor();
                         }
                         break;
                     case "Update":

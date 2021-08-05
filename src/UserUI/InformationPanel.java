@@ -3,6 +3,8 @@ package UserUI;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class InformationPanel extends JPanel {
     private CardLayout cardLayout;
@@ -20,7 +22,11 @@ public class InformationPanel extends JPanel {
 
         //+Button update
         JButton btnUpdate;
+
+        //Id user
+        private int idUSer;
     public InformationPanel(HomeUserPanel card) {
+        idUSer = card.getId();
         cardLayout = card.getCardLayout();
         cardPanel = card.getCardPanel();
         cardPanel.add(this,HomeUserPanel.INFORMATIONCARD);
@@ -153,6 +159,12 @@ public class InformationPanel extends JPanel {
                         buttonBox2.setLayout(new BorderLayout());
                         btnUpdate = new JButton("Update");
                         buttonBox2.add(btnUpdate, BorderLayout.CENTER);
+                        btnUpdate.addActionListener(new ActionListener() {
+                            @Override
+                            public void actionPerformed(ActionEvent actionEvent) {
+                                new DialogInformationPanel().setVisible(true);
+                            }
+                        });
                         containButton.add(buttonBox2);
                         JPanel buttonBox3 = new JPanel();
                         containButton.add(buttonBox3);
@@ -165,5 +177,6 @@ public class InformationPanel extends JPanel {
     }
 
     public void showInformationPanel() { this.cardLayout.show(cardPanel, HomeUserPanel.INFORMATIONCARD);}
+
 
 }
