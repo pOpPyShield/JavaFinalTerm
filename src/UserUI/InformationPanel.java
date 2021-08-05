@@ -1,15 +1,27 @@
 package UserUI;
 
+import DB.DBConnect;
+
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.text.SimpleDateFormat;
 
 public class InformationPanel extends JPanel {
     private CardLayout cardLayout;
     private JPanel cardPanel;
-
+    DBConnect db;
+    Connection connection;
+    PreparedStatement pstmt;
     //Image section
     JLabel imageDisplay, nameOfStudent;
 
@@ -25,7 +37,10 @@ public class InformationPanel extends JPanel {
 
         //Id user
         private int idUSer;
+        private InputStream inputImage;
     public InformationPanel(HomeUserPanel card) {
+        this.db = new DBConnect(3306,"javafinalimportant","adminjava","Admin1234@");
+        connection = this.db.getConn();
         idUSer = card.getId();
         cardLayout = card.getCardLayout();
         cardPanel = card.getCardPanel();
@@ -157,15 +172,19 @@ public class InformationPanel extends JPanel {
                         containButton.add(buttonBox1);
                         JPanel buttonBox2 = new JPanel();
                         buttonBox2.setLayout(new BorderLayout());
-                        btnUpdate = new JButton("Update");
-                        buttonBox2.add(btnUpdate, BorderLayout.CENTER);
-                        btnUpdate.addActionListener(new ActionListener() {
-                            @Override
-                            public void actionPerformed(ActionEvent actionEvent) {
-                                new DialogInformationPanel().setVisible(true);
-                            }
-                        });
-                        containButton.add(buttonBox2);
+                        if(!checkInfor()) {
+                            btnUpdate = new JButton("Update");
+                            buttonBox2.add(btnUpdate, BorderLayout.CENTER);
+                            btnUpdate.addActionListener(new ActionListener() {
+                                @Override
+                                public void actionPerformed(ActionEvent actionEvent) {
+                                    new DialogInformationPanel(idUSer).setVisible(true);
+                                }
+                            });
+                            containButton.add(buttonBox2);
+                        } else {
+                            containButton.add(new JLabel());
+                        }
                         JPanel buttonBox3 = new JPanel();
                         containButton.add(buttonBox3);
                     containInforBox2.add(containButton);
@@ -174,9 +193,69 @@ public class InformationPanel extends JPanel {
                 containInformationOfStudent.add(containInforBox3);
             belowLabel.add(containInformationOfStudent);
             add(belowLabel, BorderLayout.CENTER);
+
     }
 
     public void showInformationPanel() { this.cardLayout.show(cardPanel, HomeUserPanel.INFORMATIONCARD);}
+    //Check information
+    private boolean checkInfor() {
+        boolean checkUserInfor = false;
+        try {
+            pstmt = connection.prepareStatement("SELECT * FROM UserInfor WHERE IDUser=?");
+            pstmt.setInt(1, idUSer);
+            ResultSet rs = pstmt.executeQuery();
+            if(rs.next()) {
+                checkUserInfor = true;
+                setFieldIfHaveInformation();
+            }
+        } catch (Exception ex) {ex.printStackTrace();}
+        return checkUserInfor;
+    }
 
+    private void setFieldIfHaveInformation() {
+       SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+       String date = null;
+       byte[] bytes = null;
+       String[] eachDay;
+       try {
+           pstmt = connection.prepareStatement("SELECT * FROM UserInfor WHERE IDUser=?");
+           pstmt.setInt(1, idUSer);
+           ResultSet ss = pstmt.executeQuery();
+           while (ss.next()) {
+               nameOfStudent.setText(ss.getString("Name"));
+               nameLabel.setText(ss.getString("Name"));
+               idLabel.setText(ss.getString("IDUser"));
+                date =formatter.format(ss.getDate("DateOfBirth"));
+           }
+       } catch (Exception ex) {ex.printStackTrace();}
+       try {
+           pstmt = connection.prepareStatement("SELECT * FROM ImageUser WHERE IDUser=?");
+           pstmt.setInt(1,idUSer);
+           ResultSet ss = pstmt.executeQuery();
+           while (ss.next()) {
+               bytes = ss.getBytes("ImageUser");
+           }
+       } catch (Exception ex) {ex.printStackTrace();}
 
+       //Process date
+        eachDay = date.split("/");
+       day.addItem(eachDay[0]);
+       month.addItem(eachDay[1]);
+       year.addItem(eachDay[2]);
+       inputImage = new ByteArrayInputStream(bytes);
+        BufferedImage img = null;
+        try {
+            img = ImageIO.read(inputImage);
+        }catch (Exception e) {e.printStackTrace();}
+        ImageIcon imageIcon = new ImageIcon(fitImage(img,imageDisplay.getWidth(),imageDisplay.getHeight()));
+        imageDisplay.setIcon(imageIcon);
+    }
+    private Image fitImage(Image img, int w, int h) {
+        BufferedImage resizedImage = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g2 = resizedImage.createGraphics();
+        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g2.drawImage(img, 0, 0, w, h, null);
+        g2.dispose();
+        return resizedImage;
+    }
 }
